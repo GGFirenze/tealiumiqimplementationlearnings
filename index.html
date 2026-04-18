@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orange × Amplitude — Tealium iQ Installation Guide</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍊</text></svg>">
+<style>
+  :root {
+    --orange-brand: #FF7900;
+    --orange-dark: #E56A00;
+    --orange-light: #FFF0E0;
+    --amp-blue: #1E61DC;
+    --amp-light: #E8F0FE;
+    --teal: #00B4AA;
+    --teal-light: #E0F7F6;
+    --bg: #F8F9FB;
+    --surface: #FFFFFF;
+    --text: #1A1D23;
+    --text-secondary: #5F6572;
+    --border: #E2E5EA;
+    --success: #16A34A;
+    --success-light: #DCFCE7;
+    --warning: #D97706;
+    --warning-light: #FEF3C7;
+    --danger: #DC2626;
+    --danger-light: #FEE2E2;
+    --code-bg: #1E1E2E;
+    --code-text: #CDD6F4;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 24px rgba(0,0,0,0.10);
+    --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Top Nav ── */
+  .topnav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px;
+    backdrop-filter: blur(12px);
+  }
+  .topnav-left { display: flex; align-items: center; gap: 12px; }
+  .topnav-logo {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--orange-brand);
+    display: grid; place-items: center;
+    color: white; font-weight: 700; font-size: 14px;
+  }
+  .topnav-title { font-weight: 600; font-size: 15px; }
+  .topnav-title span { color: var(--text-secondary); font-weight: 400; }
+
+  .progress-bar-container {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .progress-bar-track {
+    width: 180px; height: 6px; background: var(--border);
+    border-radius: 3px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--orange-brand), var(--amp-blue));
+    border-radius: 3px; transition: width 0.5s ease;
+    width: 0%;
+  }
+  .progress-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; white-space: nowrap; }
+
+  /* ── Layout ── */
+  .layout {
+    display: flex; min-height: calc(100vh - 56px);
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 280px; flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky; top: 56px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+  }
+  .sidebar-section { padding: 0 16px; margin-bottom: 24px; }
+  .sidebar-section-title {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--text-secondary);
+    padding: 0 8px; margin-bottom: 8px;
+  }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: 8px;
+    cursor: pointer; transition: all var(--transition);
+    font-size: 13.5px; color: var(--text-secondary);
+    position: relative;
+  }
+  .sidebar-item:hover { background: var(--bg); color: var(--text); }
+  .sidebar-item.active {
+    background: var(--orange-light); color: var(--orange-dark);
+    font-weight: 600;
+  }
+  .sidebar-item.completed .step-indicator {
+    background: var(--success); color: white;
+  }
+  .step-indicator {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 700;
+    background: var(--border); color: var(--text-secondary);
+    flex-shrink: 0; transition: all var(--transition);
+  }
+  .sidebar-item.active .step-indicator {
+    background: var(--orange-brand); color: white;
+  }
+
+  /* ── Main Content ── */
+  .main { flex: 1; padding: 32px 48px; max-width: 960px; }
+
+  .section { display: none; animation: fadeIn 0.3s ease; }
+  .section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    margin-bottom: 32px; padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.04em; margin-bottom: 8px;
+    padding: 4px 10px; border-radius: 6px;
+  }
+  .badge-fundamentals { background: var(--teal-light); color: var(--teal); }
+  .badge-architecture { background: var(--amp-light); color: var(--amp-blue); }
+  .badge-install { background: var(--orange-light); color: var(--orange-dark); }
+  .badge-code { background: #F3E8FF; color: #7C3AED; }
+  .badge-verify { background: var(--success-light); color: var(--success); }
+  .badge-quiz { background: var(--warning-light); color: var(--warning); }
+
+  .section-title { font-size: 28px; font-weight: 700; line-height: 1.2; margin-bottom: 6px; }
+  .section-subtitle { font-size: 15px; color: var(--text-secondary); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+    margin-bottom: 20px; box-shadow: var(--shadow);
+    transition: all var(--transition);
+  }
+  .card:hover { box-shadow: var(--shadow-lg); }
+  .card h3 { font-size: 17px; font-weight: 600; margin-bottom: 12px; }
+  .card p { color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; }
+
+  /* ── Analogy Boxes ── */
+  .analogy {
+    background: linear-gradient(135deg, #FFF7ED, #FFF0E0);
+    border: 1px solid #FED7AA;
+    border-radius: var(--radius); padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  .analogy-icon { font-size: 24px; margin-bottom: 8px; }
+  .analogy h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: var(--orange-dark); }
+  .analogy p { font-size: 14px; color: #9A3412; }
+
+  /* ── Info/Tip/Warning Boxes ── */
+  .infobox {
+    border-radius: var(--radius); padding: 16px 20px;
+    margin-bottom: 16px; font-size: 14px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .infobox-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .infobox-tip { background: var(--teal-light); border: 1px solid #99E5E0; }
+  .infobox-warn { background: var(--warning-light); border: 1px solid #FDE68A; }
+  .infobox-danger { background: var(--danger-light); border: 1px solid #FECACA; }
+  .infobox-info { background: var(--amp-light); border: 1px solid #BFDBFE; }
+
+  /* ── Interactive Diagram ── */
+  .diagram-container {
+    background: var(--code-bg); border-radius: var(--radius);
+    padding: 32px 32px 24px; margin-bottom: 0;
+    border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+  }
+  .diagram-flow {
+    display: flex; align-items: center; gap: 0;
+    min-width: 600px; justify-content: center; flex-wrap: nowrap;
+    overflow-x: auto; padding-bottom: 4px;
+  }
+  .diagram-node {
+    padding: 14px 18px; border-radius: 10px;
+    text-align: center; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all var(--transition);
+    border: 2px solid transparent;
+    min-width: 120px; user-select: none;
+  }
+  .diagram-node:hover { transform: translateY(-2px); }
+  .diagram-node.highlight { border-color: var(--orange-brand); box-shadow: 0 0 0 4px rgba(255,121,0,0.2); }
+  .node-website { background: #374151; color: #F9FAFB; }
+  .node-tealium { background: #0F766E; color: #CCFBF1; }
+  .node-tag1 { background: #1E40AF; color: #DBEAFE; }
+  .node-tag2 { background: #7C3AED; color: #EDE9FE; }
+  .node-amplitude { background: var(--amp-blue); color: white; }
+  .diagram-arrow {
+    color: #6B7280; font-size: 20px; padding: 0 6px;
+    flex-shrink: 0; display: flex; align-items: center;
+  }
+  .diagram-detail-panel {
+    background: #232336; border: 1px solid #3a3a52;
+    border-top: 2px solid var(--orange-brand);
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding: 20px 24px; margin-bottom: 20px;
+    min-height: 64px; transition: all 0.3s ease;
+  }
+  .diagram-detail-panel .detail-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--orange-brand); margin-bottom: 6px;
+  }
+  .diagram-detail-panel .detail-text {
+    font-size: 13.5px; color: #CDD6F4; line-height: 1.65;
+  }
+  .diagram-detail-panel .detail-text code {
+    background: rgba(255,255,255,0.1); padding: 1px 5px;
+    border-radius: 3px; font-size: 12px;
+  }
+  .diagram-detail-panel .detail-placeholder {
+    font-size: 13px; color: #6C7086; font-style: italic;
+  }
+
+  /* ── Simulated UI ── */
+  .sim-ui {
+    background: #F1F5F9; border-radius: var(--radius);
+    border: 1px solid var(--border); overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .sim-ui-titlebar {
+    background: #334155; color: #E2E8F0; padding: 8px 16px;
+    font-size: 12px; font-weight: 500;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sim-dots { display: flex; gap: 6px; }
+  .sim-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .sim-dot-r { background: #EF4444; }
+  .sim-dot-y { background: #F59E0B; }
+  .sim-dot-g { background: #22C55E; }
+  .sim-ui-body { padding: 20px; }
+  .sim-ui-nav {
+    display: flex; gap: 0; margin-bottom: 16px;
+    background: white; border-radius: 8px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .sim-ui-tab {
+    padding: 10px 16px; font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: all var(--transition);
+    border-right: 1px solid var(--border); color: var(--text-secondary);
+  }
+  .sim-ui-tab:last-child { border-right: none; }
+  .sim-ui-tab.active { background: var(--teal); color: white; }
+  .sim-ui-tab:hover:not(.active) { background: var(--bg); }
+
+  .sim-panel { display: none; }
+  .sim-panel.active { display: block; animation: fadeIn 0.2s ease; }
+
+  .sim-field { margin-bottom: 12px; }
+  .sim-field label {
+    display: block; font-size: 12px; font-weight: 600;
+    margin-bottom: 4px; color: var(--text-secondary);
+  }
+  .sim-field input, .sim-field select {
+    width: 100%; padding: 8px 12px; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 13px; background: white;
+    transition: border-color var(--transition);
+  }
+  .sim-field input:focus, .sim-field select:focus {
+    outline: none; border-color: var(--teal);
+  }
+
+  .sim-tag-row {
+    display: flex; align-items: center; gap: 12px; padding: 12px;
+    background: white; border-radius: 8px; border: 1px solid var(--border);
+    margin-bottom: 8px; cursor: grab; transition: all var(--transition);
+  }
+  .sim-tag-row:hover { border-color: var(--teal); }
+  .sim-tag-row .grip { color: #CBD5E1; font-size: 14px; }
+  .sim-tag-name { font-size: 13px; font-weight: 600; flex: 1; }
+  .sim-tag-badge {
+    font-size: 11px; font-weight: 600; padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .sim-badge-sync { background: #DBEAFE; color: #1E40AF; }
+  .sim-badge-async { background: #F3E8FF; color: #7C3AED; }
+
+  /* ── Load Order Visualizer ── */
+  .load-order {
+    display: flex; flex-direction: column; gap: 2px;
+    margin-bottom: 16px;
+  }
+  .load-step {
+    display: flex; align-items: stretch; gap: 0;
+    border-radius: 8px; overflow: hidden;
+    cursor: pointer; transition: all var(--transition);
+  }
+  .load-step:hover { transform: translateX(4px); }
+  .load-step.highlight { box-shadow: 0 0 0 2px var(--orange-brand); }
+  .load-step-num {
+    width: 48px; display: grid; place-items: center;
+    font-size: 14px; font-weight: 700; color: white;
+    flex-shrink: 0;
+  }
+  .load-step-content {
+    flex: 1; padding: 12px 16px;
+    font-size: 13px; font-weight: 500;
+  }
+  .load-step-desc {
+    font-size: 11px; font-weight: 400; opacity: 0.8;
+    margin-top: 2px;
+  }
+  .ls-1 .load-step-num { background: #1E40AF; }
+  .ls-1 .load-step-content { background: #DBEAFE; color: #1E3A5F; }
+  .ls-2 .load-step-num { background: #6B21A8; }
+  .ls-2 .load-step-content { background: #F3E8FF; color: #4C1D95; }
+  .ls-3 .load-step-num { background: #0F766E; }
+  .ls-3 .load-step-content { background: #CCFBF1; color: #134E4A; }
+  .ls-4 .load-step-num { background: #9A3412; }
+  .ls-4 .load-step-content { background: #FFF7ED; color: #7C2D12; }
+  .ls-5 .load-step-num { background: #7C3AED; }
+  .ls-5 .load-step-content { background: #EDE9FE; color: #4C1D95; }
+
+  /* ── Code Explorer ── */
+  .code-explorer {
+    background: var(--code-bg); border-radius: var(--radius);
+    overflow: hidden; margin-bottom: 20px;
+  }
+  .code-explorer-tabs {
+    display: flex; gap: 0; background: #181825; overflow-x: auto;
+  }
+  .code-tab {
+    padding: 10px 18px; font-size: 12px; font-weight: 500;
+    color: #6C7086; cursor: pointer; white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all var(--transition);
+  }
+  .code-tab:hover { color: #BAC2DE; }
+  .code-tab.active { color: var(--orange-brand); border-bottom-color: var(--orange-brand); }
+  .code-block {
+    padding: 20px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 13px; line-height: 1.7; color: var(--code-text);
+    overflow-x: auto; display: none; max-height: 400px; overflow-y: auto;
+  }
+  .code-block.active { display: block; animation: fadeIn 0.2s ease; }
+  .code-annotation {
+    background: rgba(255,121,0,0.12); border-left: 3px solid var(--orange-brand);
+    padding: 10px 14px; margin: 8px 0; border-radius: 0 6px 6px 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 12.5px; color: #FAB387; line-height: 1.5;
+  }
+  .code-keyword { color: #CBA6F7; }
+  .code-string { color: #A6E3A1; }
+  .code-comment { color: #6C7086; font-style: italic; }
+  .code-func { color: #89B4FA; }
+  .code-num { color: #FAB387; }
+  .code-var { color: #F9E2AF; }
+  .code-prop { color: #89DCEB; }
+
+  /* ── Timeline ── */
+  .timeline { position: relative; padding-left: 28px; margin: 20px 0; }
+  .timeline::before {
+    content: ''; position: absolute; left: 11px; top: 0;
+    bottom: 0; width: 2px; background: var(--border);
+  }
+  .timeline-item { position: relative; padding-bottom: 24px; }
+  .timeline-item:last-child { padding-bottom: 0; }
+  .timeline-dot {
+    position: absolute; left: -28px; top: 2px;
+    width: 22px; height: 22px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 10px; color: white;
+    z-index: 1;
+  }
+  .td-blue { background: var(--amp-blue); }
+  .td-orange { background: var(--orange-brand); }
+  .td-teal { background: var(--teal); }
+  .td-purple { background: #7C3AED; }
+  .td-green { background: var(--success); }
+  .timeline-item h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .timeline-item p { font-size: 13px; color: var(--text-secondary); }
+
+  /* ── Checklist ── */
+  .checklist { list-style: none; }
+  .checklist li {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .check-box {
+    width: 20px; height: 20px; border-radius: 6px;
+    border: 2px solid var(--border); flex-shrink: 0;
+    cursor: pointer; display: grid; place-items: center;
+    transition: all var(--transition); margin-top: 1px;
+  }
+  .check-box.checked {
+    background: var(--success); border-color: var(--success); color: white;
+  }
+  .check-text.done { text-decoration: line-through; color: var(--text-secondary); }
+
+  /* ── Quiz ── */
+  .quiz-question {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+    margin-bottom: 16px;
+  }
+  .quiz-q { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-option {
+    padding: 12px 16px; border: 2px solid var(--border);
+    border-radius: 8px; font-size: 13.5px; cursor: pointer;
+    transition: all var(--transition);
+  }
+  .quiz-option:hover { border-color: var(--amp-blue); background: var(--amp-light); }
+  .quiz-option.selected { border-color: var(--amp-blue); background: var(--amp-light); font-weight: 500; }
+  .quiz-option.correct { border-color: var(--success); background: var(--success-light); }
+  .quiz-option.wrong { border-color: var(--danger); background: var(--danger-light); }
+  .quiz-explanation {
+    margin-top: 12px; padding: 12px 16px;
+    border-radius: 8px; font-size: 13px;
+    display: none; line-height: 1.6;
+  }
+  .quiz-explanation.show { display: block; animation: fadeIn 0.2s ease; }
+  .quiz-explanation.correct-expl { background: var(--success-light); border: 1px solid #86EFAC; }
+  .quiz-explanation.wrong-expl { background: var(--danger-light); border: 1px solid #FECACA; }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 10px 20px; border-radius: 8px;
+    font-size: 14px; font-weight: 600;
+    border: none; cursor: pointer;
+    transition: all var(--transition);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary { background: var(--orange-brand); color: white; }
+  .btn-primary:hover { background: var(--orange-dark); }
+  .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-success { background: var(--success); color: white; }
+  .btn-success:hover { background: #15803D; }
+
+  .nav-buttons {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 24px; border-top: 1px solid var(--border);
+    margin-top: 32px;
+  }
+
+  /* ── Confidence Meter ── */
+  .confidence-widget {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+    margin-bottom: 20px; text-align: center;
+  }
+  .confidence-widget h4 { font-size: 14px; margin-bottom: 12px; }
+  .confidence-faces {
+    display: flex; justify-content: center; gap: 12px; margin-bottom: 8px;
+  }
+  .confidence-face {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 22px;
+    cursor: pointer; border: 2px solid var(--border);
+    transition: all var(--transition);
+  }
+  .confidence-face:hover { transform: scale(1.15); }
+  .confidence-face.selected { border-color: var(--orange-brand); background: var(--orange-light); transform: scale(1.15); }
+  .confidence-label { font-size: 12px; color: var(--text-secondary); }
+
+  /* ── Expand/Collapse ── */
+  .expandable { margin-bottom: 12px; }
+  .expand-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px;
+    cursor: pointer; font-size: 14px; font-weight: 600;
+    transition: all var(--transition);
+  }
+  .expand-header:hover { background: var(--bg); }
+  .expand-header.open { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+  .expand-arrow { transition: transform var(--transition); }
+  .expand-header.open .expand-arrow { transform: rotate(180deg); }
+  .expand-body {
+    display: none; padding: 16px 18px;
+    border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 8px 8px; background: var(--surface);
+    font-size: 13.5px; color: var(--text-secondary); line-height: 1.7;
+  }
+  .expand-body.open { display: block; animation: fadeIn 0.2s ease; }
+
+  /* ── Sequence Animation ── */
+  .sequence-container { margin: 20px 0; }
+  .sequence-step {
+    display: flex; align-items: center; gap: 16px;
+    padding: 12px 16px; border-radius: 8px;
+    margin-bottom: 4px; opacity: 0.3;
+    transition: all 0.5s ease; font-size: 13px;
+  }
+  .sequence-step.active { opacity: 1; background: var(--amp-light); }
+  .sequence-step.done { opacity: 0.6; }
+  .seq-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 12px; font-weight: 700;
+    background: var(--border); color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+  .sequence-step.active .seq-num { background: var(--amp-blue); color: white; }
+  .sequence-step.done .seq-num { background: var(--success); color: white; }
+
+  .play-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 8px;
+    background: var(--amp-blue); color: white;
+    border: none; cursor: pointer; font-size: 13px; font-weight: 600;
+    transition: all var(--transition); margin-bottom: 12px;
+  }
+  .play-btn:hover { background: #1550B8; }
+
+  /* ── Mapping Table ── */
+  .mapping-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 13px; margin-bottom: 16px;
+  }
+  .mapping-table th {
+    text-align: left; padding: 10px 14px;
+    background: var(--bg); font-weight: 600;
+    border-bottom: 2px solid var(--border);
+  }
+  .mapping-table td {
+    padding: 10px 14px; border-bottom: 1px solid var(--border);
+  }
+  .mapping-table tr:hover td { background: #F8FAFC; }
+  .mapping-table code {
+    background: #F1F5F9; padding: 2px 6px;
+    border-radius: 4px; font-size: 12px;
+    font-family: 'SF Mono', monospace;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { padding: 20px; }
+    .diagram-flow { overflow-x: auto; }
+  }
+
+  .tag-label {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 700; margin-right: 4px;
+  }
+  .tag-label-1 { background: #DBEAFE; color: #1E40AF; }
+  .tag-label-2 { background: #EDE9FE; color: #7C3AED; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<nav class="topnav">
+  <div class="topnav-left">
+    <div class="topnav-logo">O</div>
+    <div class="topnav-title">Orange &times; Amplitude <span>| Installation Guide</span></div>
+  </div>
+  <div class="progress-bar-container">
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 / 7 complete</div>
+  </div>
+</nav>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- Main Content -->
+  <main class="main" id="mainContent"></main>
+</div>
+
+<script>
+// ── Section Definitions ──
+const sections = [
+  {
+    id: 'welcome',
+    title: 'Welcome',
+    group: 'Getting Started',
+    badge: { text: 'Start Here', cls: 'badge-fundamentals' },
+    fullTitle: 'Welcome to Your Learning Guide',
+    subtitle: 'Everything you need to confidently install Amplitude via Tealium iQ for Orange.'
+  },
+  {
+    id: 'tealium-101',
+    title: 'Tealium iQ 101',
+    group: 'Getting Started',
+    badge: { text: 'Fundamentals', cls: 'badge-fundamentals' },
+    fullTitle: 'What is Tealium iQ?',
+    subtitle: 'The tag management system at the centre of this implementation.'
+  },
+  {
+    id: 'amplitude-101',
+    title: 'Amplitude 101',
+    group: 'Getting Started',
+    badge: { text: 'Fundamentals', cls: 'badge-fundamentals' },
+    fullTitle: 'What is Amplitude?',
+    subtitle: 'The analytics platform Orange is sending data to.'
+  },
+  {
+    id: 'architecture',
+    title: 'Two-Tag Architecture',
+    group: 'Architecture',
+    badge: { text: 'Architecture', cls: 'badge-architecture' },
+    fullTitle: 'The Two-Tag Architecture',
+    subtitle: 'Why this implementation uses two tags and how they work together.'
+  },
+  {
+    id: 'load-order',
+    title: 'Load Order',
+    group: 'Architecture',
+    badge: { text: 'Architecture', cls: 'badge-architecture' },
+    fullTitle: 'Tealium Load Order Manager',
+    subtitle: 'How Tealium decides what loads when — and why it matters here.'
+  },
+  {
+    id: 'install-tag1',
+    title: 'Install Tag 1',
+    group: 'Installation',
+    badge: { text: 'Installation', cls: 'badge-install' },
+    fullTitle: 'Step-by-Step: Install Tag 1 (Web Experiment)',
+    subtitle: 'The synchronous experiment script that must load first.'
+  },
+  {
+    id: 'install-tag2',
+    title: 'Install Tag 2',
+    group: 'Installation',
+    badge: { text: 'Installation', cls: 'badge-install' },
+    fullTitle: 'Step-by-Step: Install Tag 2 (Amplitude SDK)',
+    subtitle: 'Uploading and configuring the main Amplitude tag template.'
+  },
+  {
+    id: 'data-mappings',
+    title: 'Data Mappings',
+    group: 'Installation',
+    badge: { text: 'Installation', cls: 'badge-install' },
+    fullTitle: 'Configuring Data Mappings',
+    subtitle: 'Connecting Orange\'s data layer to Amplitude\'s expected properties.'
+  },
+  {
+    id: 'code-deep-dive',
+    title: 'Code Deep Dive',
+    group: 'Understanding the Code',
+    badge: { text: 'Code', cls: 'badge-code' },
+    fullTitle: 'Inside the Tag Template',
+    subtitle: 'An annotated walkthrough of the key sections in tealium_template.js.'
+  },
+  {
+    id: 'init-sequence',
+    title: 'Init Sequence',
+    group: 'Understanding the Code',
+    badge: { text: 'Code', cls: 'badge-code' },
+    fullTitle: 'The Initialisation Sequence',
+    subtitle: 'Watch the exact order of operations when a user hits the page.'
+  },
+  {
+    id: 'verification',
+    title: 'Verification',
+    group: 'Go-Live',
+    badge: { text: 'Verify', cls: 'badge-verify' },
+    fullTitle: 'Verification Checklist',
+    subtitle: 'How to confirm everything is working after publishing.'
+  },
+  {
+    id: 'troubleshooting',
+    title: 'Troubleshooting',
+    group: 'Go-Live',
+    badge: { text: 'Verify', cls: 'badge-verify' },
+    fullTitle: 'Troubleshooting Guide',
+    subtitle: 'Common problems and how to fix them.'
+  },
+  {
+    id: 'quiz',
+    title: 'Knowledge Check',
+    group: 'Assessment',
+    badge: { text: 'Quiz', cls: 'badge-quiz' },
+    fullTitle: 'Knowledge Check',
+    subtitle: 'Test your understanding before the on-site visit.'
+  }
+];
+
+let currentSection = 0;
+let completedSections = new Set();
+let quizAnswers = {};
+
+// ── Build Sidebar ──
+function buildSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  let html = '';
+  let lastGroup = '';
+  sections.forEach((s, i) => {
+    if (s.group !== lastGroup) {
+      if (lastGroup) html += '</div>';
+      html += `<div class="sidebar-section"><div class="sidebar-section-title">${s.group}</div>`;
+      lastGroup = s.group;
+    }
+    const cls = i === currentSection ? 'active' : (completedSections.has(i) ? 'completed' : '');
+    const icon = completedSections.has(i) ? '&#10003;' : (i + 1);
+    html += `<div class="sidebar-item ${cls}" onclick="goToSection(${i})">
+      <div class="step-indicator">${icon}</div>
+      <span>${s.title}</span>
+    </div>`;
+  });
+  html += '</div>';
+  sidebar.innerHTML = html;
+}
+
+// ── Section Content Generators ──
+const sectionContent = {
+  'welcome': () => `
+    <div class="card" style="border-left: 4px solid var(--orange-brand);">
+      <h3>What this guide covers</h3>
+      <p>This interactive guide will take you from <strong>zero Tealium knowledge</strong> to being confident enough to support the Orange on-site installation. You'll learn:</p>
+      <div class="timeline" style="margin-top: 16px;">
+        <div class="timeline-item"><div class="timeline-dot td-teal">1</div><h4>Tealium iQ fundamentals</h4><p>What it is, how tags work, the data layer concept</p></div>
+        <div class="timeline-item"><div class="timeline-dot td-blue">2</div><h4>Amplitude basics</h4><p>Events, user properties, plugins, SDK lifecycle</p></div>
+        <div class="timeline-item"><div class="timeline-dot td-orange">3</div><h4>The two-tag architecture</h4><p>Why two tags, load ordering, the race condition problem</p></div>
+        <div class="timeline-item"><div class="timeline-dot td-purple">4</div><h4>Step-by-step installation</h4><p>Simulated Tealium iQ UI walkthroughs for both tags</p></div>
+        <div class="timeline-item"><div class="timeline-dot td-green">5</div><h4>Verification & troubleshooting</h4><p>How to confirm it works and fix common issues</p></div>
+      </div>
+    </div>
+    <div class="infobox infobox-tip">
+      <div class="infobox-icon">&#128161;</div>
+      <div><strong>How to use this guide:</strong> Work through each section in order using the sidebar or the Next/Previous buttons. Each section builds on the last. Click on interactive elements — diagrams, expandable sections, and the simulated UI — to explore deeper. End with the knowledge check to test your confidence.</div>
+    </div>
+    <div class="confidence-widget">
+      <h4>How confident do you feel about this project right now?</h4>
+      <div class="confidence-faces">
+        <div class="confidence-face" onclick="setConfidence(this, 1)" title="Very unsure">&#128531;</div>
+        <div class="confidence-face" onclick="setConfidence(this, 2)" title="Nervous">&#128533;</div>
+        <div class="confidence-face" onclick="setConfidence(this, 3)" title="Neutral">&#128528;</div>
+        <div class="confidence-face" onclick="setConfidence(this, 4)" title="Getting there">&#128578;</div>
+        <div class="confidence-face" onclick="setConfidence(this, 5)" title="Confident">&#128513;</div>
+      </div>
+      <div class="confidence-label">We'll ask again at the end to see how far you've come</div>
+    </div>
+  `,
+
+  'tealium-101': () => `
+    <div class="analogy">
+      <div class="analogy-icon">&#128230;</div>
+      <h4>Think of it like a postal sorting office</h4>
+      <p>A website generates data (letters). Without Tealium, each analytics vendor (recipient) needs its own mailbox bolted onto the website's code. Tealium iQ is the <strong>sorting office</strong> — the website drops all letters into one box, and Tealium routes them to the right recipients (Amplitude, Google Analytics, etc.) based on rules you configure. No code changes on the website needed.</p>
+    </div>
+
+    <div class="card">
+      <h3>The Three Core Concepts</h3>
+      <div class="expandable">
+        <div class="expand-header" onclick="toggleExpand(this)">
+          <span>&#9312; The Data Layer (<code>utag_data</code>)</span>
+          <span class="expand-arrow">&#9660;</span>
+        </div>
+        <div class="expand-body">
+          <p>This is a JavaScript object that the website populates on every page. It contains key-value pairs describing what's happening:</p>
+          <pre style="background:#F1F5F9; padding:12px; border-radius:6px; margin:8px 0; font-size:12px; overflow-x:auto;"><code>utag_data = {
+  page_name: "Offres Mobile",
+  customer_id: "ORG-123456",
+  page_type: "product_listing",
+  logged_in: "true"
+}</code></pre>
+          <p style="margin-top:8px;">Orange's developers maintain this. Your job is to <strong>map</strong> these variables to where Amplitude expects them.</p>
+        </div>
+      </div>
+      <div class="expandable">
+        <div class="expand-header" onclick="toggleExpand(this)">
+          <span>&#9313; Tags (Vendor Integrations)</span>
+          <span class="expand-arrow">&#9660;</span>
+        </div>
+        <div class="expand-body">
+          <p>A <strong>tag</strong> is a piece of JavaScript that sends data to a vendor. Tealium has a marketplace of pre-built tags, but for complex setups like this one, you upload a <strong>Custom Container</strong> — which is exactly what <code>tealium_template.js</code> is.</p>
+          <p style="margin-top:8px;">Tags can be <strong>synchronous</strong> (blocking, loads before the page renders) or <strong>asynchronous</strong> (non-blocking, loads in the background). This distinction is critical for the Orange setup.</p>
+        </div>
+      </div>
+      <div class="expandable">
+        <div class="expand-header" onclick="toggleExpand(this)">
+          <span>&#9314; Load Rules &amp; Extensions</span>
+          <span class="expand-arrow">&#9660;</span>
+        </div>
+        <div class="expand-body">
+          <p><strong>Load Rules</strong> control <em>when</em> a tag fires (e.g. "only on pages where <code>page_type == 'checkout'</code>"). For the Amplitude tags, both use <strong>"All Pages"</strong>.</p>
+          <p style="margin-top:8px;"><strong>Extensions</strong> let you transform data before it reaches a tag — like renaming a variable or setting a default value. The <code>##UTEXTEND##</code> placeholder in the template is where Tealium injects tag-scoped extensions at publish time.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>The Tealium Publish Workflow</h3>
+      <p>Nothing goes live until you explicitly publish. The workflow is:</p>
+      <div class="timeline">
+        <div class="timeline-item"><div class="timeline-dot td-teal">1</div><h4>Configure in Dev environment</h4><p>Add tags, mappings, extensions — test everything</p></div>
+        <div class="timeline-item"><div class="timeline-dot td-blue">2</div><h4>Publish to Dev/QA</h4><p>Generates a utag.js bundle. Test on staging site.</p></div>
+        <div class="timeline-item"><div class="timeline-dot td-orange">3</div><h4>Promote to Production</h4><p>Only after verification. This pushes to live.</p></div>
+      </div>
+    </div>
+
+    <div class="infobox infobox-info">
+      <div class="infobox-icon">&#8505;&#65039;</div>
+      <div><strong>Key takeaway:</strong> You never edit JavaScript on the live website. Everything is configured through Tealium's UI, and the <code>tealium_template.js</code> file is the tag template that Tealium processes and bundles into <code>utag.js</code> at publish time.</div>
+    </div>
+  `,
+
+  'amplitude-101': () => `
+    <div class="analogy">
+      <div class="analogy-icon">&#128200;</div>
+      <h4>Think of Amplitude like a flight recorder</h4>
+      <p>Every user action on the site (page view, button click, purchase) is an <strong>event</strong>. Amplitude records all these events with timestamps, properties, and user IDs — then lets the product team replay, query, and visualise what happened.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Events</h3>
+        <p>The core unit. Every action = an event.</p>
+        <ul style="font-size:13px; padding-left:18px; color:var(--text-secondary);">
+          <li><code>[Amplitude] Page Viewed</code> (autocaptured)</li>
+          <li><code>[Amplitude] Session Start</code> (autocaptured)</li>
+          <li><code>Plan Selected</code> (custom, via <code>event_type</code>)</li>
+          <li><code>Purchase Completed</code> (custom + revenue)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>User Properties</h3>
+        <p>Attributes that stick to a user across events.</p>
+        <ul style="font-size:13px; padding-left:18px; color:var(--text-secondary);">
+          <li><code>set</code> — overwrite a property</li>
+          <li><code>setOnce</code> — write only if not already set</li>
+          <li><code>append</code> / <code>prepend</code> — add to lists</li>
+          <li><code>unset</code> — remove a property</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>The Amplitude Plugins Used by Orange</h3>
+      <div class="expandable">
+        <div class="expand-header" onclick="toggleExpand(this)">
+          <span>&#127916; Session Replay</span><span class="expand-arrow">&#9660;</span>
+        </div>
+        <div class="expand-body">Records visual replays of user sessions — mouse movements, scrolls, clicks. Loaded from <code>cdn.eu.amplitude.com</code>. The version is configurable (currently <code>1.27.7</code> or similar).</div>
+      </div>
+      <div class="expandable">
+        <div class="expand-header" onclick="toggleExpand(this)">
+          <span>&#128172; Guides &amp; Surveys</span><span class="expand-arrow">&#9660;</span>
+        </div>
+        <div class="expand-body">In-app messaging and survey popups controlled from Amplitude's dashboard. Uses the "engagement" plugin script. Loaded via <code>&lt;API_KEY&gt;.engagement.js</code>.</div>
+      </div>
+      <div class="expandable">
+        <div class="expand-header" onclick="toggleExpand(this)">
+          <span>&#128300; Web Experiment (A/B Testing)</span><span class="expand-arrow">&#9660;</span>
+        </div>
+        <div class="expand-body">Runs A/B tests and feature flags. This one is special — it must load <strong>synchronously</strong> (before the page renders) to prevent visual flickering. That's why it gets its own separate tag (Tag 1) instead of being loaded inside the main SDK tag.</div>
+      </div>
+    </div>
+
+    <div class="infobox infobox-warn">
+      <div class="infobox-icon">&#9888;&#65039;</div>
+      <div><strong>EU Data Residency:</strong> Orange requires all data to stay in the EU. The tag uses <code>cdn.eu.amplitude.com</code> for scripts and sends events to <code>api2.eu.amplitude.com</code>. The <code>serverZone</code> must be set to <code>EU</code>.</div>
+    </div>
+  `,
+
+  'architecture': () => `
+    <div class="card">
+      <h3>Why Two Tags?</h3>
+      <p>The Web Experiment plugin needs to be available <strong>before</strong> the Amplitude SDK initialises, because:</p>
+      <ul style="font-size:14px; padding-left:18px; color:var(--text-secondary); margin-top:8px;">
+        <li>A/B test visual changes must apply <strong>before the page renders</strong> (otherwise users see a flash of the original content)</li>
+        <li>Page Triggers ("On Event Tracked") need the experiment plugin registered before the first autocaptured <code>[Amplitude] Page Viewed</code> event fires</li>
+        <li>Loading the experiment script <em>inside</em> the async tag would be too late — there was a ~45% miss rate on page triggers</li>
+      </ul>
+    </div>
+
+    <p style="font-weight:600; margin-bottom:12px;">Click on any node to learn more:</p>
+    <div class="diagram-container">
+      <div class="diagram-flow">
+        <div class="diagram-node node-website" onclick="showDiagramDetail(this, 'website')">
+          &#127760; Orange Website
+        </div>
+        <div class="diagram-arrow">&#10132;</div>
+        <div class="diagram-node node-tealium" onclick="showDiagramDetail(this, 'tealium')">
+          &#9881;&#65039; Tealium iQ<br><small>utag.js</small>
+        </div>
+        <div class="diagram-arrow">&#10132;</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div class="diagram-node node-tag1" onclick="showDiagramDetail(this, 'tag1')">
+            <span class="tag-label tag-label-1">TAG 1</span><br>
+            Web Experiment<br><small>Synchronous</small>
+          </div>
+          <div class="diagram-node node-tag2" onclick="showDiagramDetail(this, 'tag2')">
+            <span class="tag-label tag-label-2">TAG 2</span><br>
+            Amplitude SDK<br><small>Asynchronous</small>
+          </div>
+        </div>
+        <div class="diagram-arrow">&#10132;</div>
+        <div class="diagram-node node-amplitude" onclick="showDiagramDetail(this, 'amplitude')">
+          &#128202; Amplitude<br><small>api2.eu.amplitude.com</small>
+        </div>
+      </div>
+    </div>
+    <div class="diagram-detail-panel" id="diagramDetailPanel">
+      <div class="detail-placeholder">&#8593; Click any node above to see what it does</div>
+    </div>
+
+    <div class="two-col">
+      <div class="card" style="border-top: 3px solid #1E40AF;">
+        <h3><span class="tag-label tag-label-1">TAG 1</span> Web Experiment</h3>
+        <table class="mapping-table">
+          <tr><td style="font-weight:600; width:120px;">Type</td><td>Synchronous</td></tr>
+          <tr><td style="font-weight:600;">Load Area</td><td>utag Sync (Step 1)</td></tr>
+          <tr><td style="font-weight:600;">Script</td><td><code>&lt;API_KEY&gt;.experiment.js</code></td></tr>
+          <tr><td style="font-weight:600;">Sets</td><td><code>window.webExperiment</code></td></tr>
+          <tr><td style="font-weight:600;">Trigger</td><td>All Pages</td></tr>
+        </table>
+      </div>
+      <div class="card" style="border-top: 3px solid #7C3AED;">
+        <h3><span class="tag-label tag-label-2">TAG 2</span> Amplitude SDK</h3>
+        <table class="mapping-table">
+          <tr><td style="font-weight:600; width:120px;">Type</td><td>Asynchronous</td></tr>
+          <tr><td style="font-weight:600;">Load Area</td><td>Tags prioritised (Step 5)</td></tr>
+          <tr><td style="font-weight:600;">Template</td><td><code>tealium_template.js</code></td></tr>
+          <tr><td style="font-weight:600;">Polls for</td><td><code>window.webExperiment</code></td></tr>
+          <tr><td style="font-weight:600;">Trigger</td><td>All Pages</td></tr>
+        </table>
+      </div>
+    </div>
+  `,
+
+  'load-order': () => `
+    <div class="analogy">
+      <div class="analogy-icon">&#128676;</div>
+      <h4>Think of it like airport boarding</h4>
+      <p>Priority boarding (synchronous tags) happens first — those passengers <em>must</em> be seated before general boarding begins. General boarding (async tags) can happen in any order. The Load Order Manager is your boarding sequence chart.</p>
+    </div>
+
+    <div class="card">
+      <h3>Tealium's 5-Step Load Order</h3>
+      <p style="margin-bottom:16px;">When <code>utag.js</code> executes on a page, it processes these steps in order. Click each step to see details:</p>
+      <div class="load-order">
+        <div class="load-step ls-1 highlight" onclick="selectLoadStep(this, 0)">
+          <div class="load-step-num">1</div>
+          <div class="load-step-content">
+            <div>utag Sync (Synchronous Tags)</div>
+            <div class="load-step-desc">&#9668; Tag 1 (Web Experiment) goes here</div>
+          </div>
+        </div>
+        <div class="load-step ls-2" onclick="selectLoadStep(this, 1)">
+          <div class="load-step-num">2</div>
+          <div class="load-step-content">
+            <div>utag.js (Container Logic)</div>
+            <div class="load-step-desc">Processes data layer, evaluates load rules</div>
+          </div>
+        </div>
+        <div class="load-step ls-3" onclick="selectLoadStep(this, 2)">
+          <div class="load-step-num">3</div>
+          <div class="load-step-content">
+            <div>Extensions (Pre-Loader)</div>
+            <div class="load-step-desc">Data transformations, variable enrichment</div>
+          </div>
+        </div>
+        <div class="load-step ls-4" onclick="selectLoadStep(this, 3)">
+          <div class="load-step-num">4</div>
+          <div class="load-step-content">
+            <div>Data Layer Processing</div>
+            <div class="load-step-desc">Final data layer is prepared for tags</div>
+          </div>
+        </div>
+        <div class="load-step ls-5 highlight" onclick="selectLoadStep(this, 4)">
+          <div class="load-step-num">5</div>
+          <div class="load-step-content">
+            <div>Tags Prioris&eacute;s (Async Tags)</div>
+            <div class="load-step-desc">&#9668; Tag 2 (Amplitude SDK) goes here</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="loadStepDetail" class="card" style="border-left: 4px solid var(--amp-blue);">
+      <h3>Step 1: utag Sync</h3>
+      <p>Scripts here are injected directly into utag.js and execute synchronously. The browser waits for them to finish before continuing. This is where Tag 1 (Web Experiment) lives, guaranteeing window.webExperiment is set before anything else runs.</p>
+    </div>
+
+    <div class="infobox infobox-danger">
+      <div class="infobox-icon">&#9888;&#65039;</div>
+      <div><strong>Critical rule:</strong> Tag 2 (the main Amplitude SDK) must NEVER be placed in utag Sync. It's a large async tag — putting it in the sync zone would block the entire page from rendering until it loads, causing a terrible user experience.</div>
+    </div>
+  `,
+
+  'install-tag1': () => `
+    <div class="card" style="border-left: 4px solid #1E40AF;">
+      <h3>What you're doing</h3>
+      <p>Creating a simple synchronous tag that loads the Amplitude Web Experiment script. This tag has no template upload — it's just a script URL configured directly in Tealium iQ.</p>
+    </div>
+
+    <div class="sim-ui">
+      <div class="sim-ui-titlebar">
+        <div class="sim-dots"><span class="sim-dot-r"></span><span class="sim-dot-y"></span><span class="sim-dot-g"></span></div>
+        Tealium iQ &mdash; Tag Configuration (Simulated)
+      </div>
+      <div class="sim-ui-body">
+        <div class="sim-ui-nav">
+          <div class="sim-ui-tab active" onclick="switchSimTab(this, 'sim-tag1-config')">Configuration</div>
+          <div class="sim-ui-tab" onclick="switchSimTab(this, 'sim-tag1-loadrule')">Load Rules</div>
+          <div class="sim-ui-tab" onclick="switchSimTab(this, 'sim-tag1-loadorder')">Load Order</div>
+        </div>
+
+        <div class="sim-panel active" id="sim-tag1-config">
+          <div class="infobox infobox-info" style="margin-bottom:16px;">
+            <div class="infobox-icon">&#9312;</div>
+            <div>In Tealium iQ, go to <strong>Tags > Add Tag</strong>. Search for "Custom JavaScript" or "Custom Container". Name it something clear like <strong>"Amplitude Web Experiment (Sync)"</strong>.</div>
+          </div>
+          <div class="sim-field">
+            <label>Tag Name</label>
+            <input type="text" value="Amplitude Web Experiment (Sync)" readonly>
+          </div>
+          <div class="sim-field">
+            <label>Tag Type</label>
+            <input type="text" value="Custom JavaScript" readonly>
+          </div>
+          <div class="sim-field">
+            <label>Script URL</label>
+            <input type="text" value="//cdn.eu.amplitude.com/script/<API_KEY>.experiment.js" readonly style="font-family: monospace; font-size:12px;">
+          </div>
+          <div class="infobox infobox-warn" style="margin-top:12px;">
+            <div class="infobox-icon">&#128221;</div>
+            <div>Replace <code>&lt;API_KEY&gt;</code> with Orange's actual Amplitude project API key. This is the same key used in Tag 2's <code>api_key</code> config.</div>
+          </div>
+        </div>
+
+        <div class="sim-panel" id="sim-tag1-loadrule">
+          <div class="infobox infobox-info" style="margin-bottom:16px;">
+            <div class="infobox-icon">&#9313;</div>
+            <div>Set the load rule to <strong>All Pages</strong> — this tag must fire on every page load so experiments are always available.</div>
+          </div>
+          <div class="sim-field">
+            <label>Load Rule</label>
+            <select><option>All Pages</option></select>
+          </div>
+        </div>
+
+        <div class="sim-panel" id="sim-tag1-loadorder">
+          <div class="infobox infobox-info" style="margin-bottom:16px;">
+            <div class="infobox-icon">&#9314;</div>
+            <div>Go to <strong>Manage > Load Order</strong>. Drag this tag into the <strong>"utag Sync"</strong> area (Step 1). This is the most critical step.</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="background:#DBEAFE; padding:12px 16px; border-radius:8px; font-size:13px;">
+              <strong style="color:#1E40AF;">utag Sync (Step 1)</strong>
+              <div class="sim-tag-row" style="margin-top:8px; border-color:#1E40AF;">
+                <span class="grip">&#8942;&#8942;</span>
+                <span class="sim-tag-name">Amplitude Web Experiment (Sync)</span>
+                <span class="sim-tag-badge sim-badge-sync">SYNC</span>
+              </div>
+            </div>
+            <div style="background:#F1F5F9; padding:12px 16px; border-radius:8px; font-size:13px; opacity:0.5;">
+              <strong>Steps 2-4</strong> (internal Tealium processing)
+            </div>
+            <div style="background:#EDE9FE; padding:12px 16px; border-radius:8px; font-size:13px;">
+              <strong style="color:#7C3AED;">Tags Prioris&eacute;s (Step 5)</strong>
+              <div style="color:#6C7086; font-size:12px; margin-top:4px;">Tag 2 will go here (next step)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="infobox infobox-tip">
+      <div class="infobox-icon">&#9989;</div>
+      <div><strong>That's it for Tag 1.</strong> It's intentionally simple — just a script URL in the sync zone. The complexity is in Tag 2.</div>
+    </div>
+  `,
+
+  'install-tag2': () => `
+    <div class="card" style="border-left: 4px solid #7C3AED;">
+      <h3>What you're doing</h3>
+      <p>Uploading the <code>tealium_template.js</code> file as a Custom Container tag, then configuring its variables. This is the main Amplitude SDK integration.</p>
+    </div>
+
+    <div class="sim-ui">
+      <div class="sim-ui-titlebar">
+        <div class="sim-dots"><span class="sim-dot-r"></span><span class="sim-dot-y"></span><span class="sim-dot-g"></span></div>
+        Tealium iQ &mdash; Tag 2 Configuration (Simulated)
+      </div>
+      <div class="sim-ui-body">
+        <div class="sim-ui-nav">
+          <div class="sim-ui-tab active" onclick="switchSimTab(this, 'sim-tag2-upload')">Upload Template</div>
+          <div class="sim-ui-tab" onclick="switchSimTab(this, 'sim-tag2-config')">Config Variables</div>
+          <div class="sim-ui-tab" onclick="switchSimTab(this, 'sim-tag2-loadorder')">Load Order</div>
+        </div>
+
+        <div class="sim-panel active" id="sim-tag2-upload">
+          <div class="infobox infobox-info" style="margin-bottom:16px;">
+            <div class="infobox-icon">&#9312;</div>
+            <div>Go to <strong>Tags > Add Tag > Custom Container</strong>. Upload <code>tealium_template.js</code> as the tag template. Tealium will process the <code>##UTID##</code> and other placeholders at publish time.</div>
+          </div>
+          <div class="sim-field">
+            <label>Tag Name</label>
+            <input type="text" value="Amplitude Browser SDK (Unified)" readonly>
+          </div>
+          <div class="sim-field">
+            <label>Template File</label>
+            <div style="display:flex; align-items:center; gap:8px; padding:8px 12px; background:white; border:1px dashed var(--border); border-radius:6px; font-size:13px;">
+              &#128196; tealium_template.js <span style="color:var(--success); margin-left:auto;">&#10003; Uploaded</span>
+            </div>
+          </div>
+          <div class="sim-field">
+            <label>Load Rule</label>
+            <select><option>All Pages</option></select>
+          </div>
+        </div>
+
+        <div class="sim-panel" id="sim-tag2-config">
+          <div class="infobox infobox-info" style="margin-bottom:16px;">
+            <div class="infobox-icon">&#9313;</div>
+            <div>These are the <strong>configuration variables</strong> that map to the <code>##UTVARconfig_*##</code> placeholders in the template. Set them in the tag's configuration panel.</div>
+          </div>
+          <div class="sim-field">
+            <label>api_key <span style="color:var(--danger);">*required</span></label>
+            <input type="text" value="<Orange's Amplitude API Key>" style="font-family:monospace; font-size:12px;">
+          </div>
+          <div class="sim-field">
+            <label>session_replay</label>
+            <select><option>true</option><option>false</option></select>
+          </div>
+          <div class="sim-field">
+            <label>session_replay_version</label>
+            <input type="text" value="1.27.7" style="font-family:monospace;">
+          </div>
+          <div class="sim-field">
+            <label>guides_and_surveys</label>
+            <select><option>true</option><option>false</option></select>
+          </div>
+          <div class="sim-field">
+            <label>web_experiment</label>
+            <select><option selected>true</option><option>false</option></select>
+          </div>
+          <div class="infobox infobox-warn" style="margin-top:8px;">
+            <div class="infobox-icon">&#128221;</div>
+            <div><code>web_experiment</code> must be <code>true</code> because we set up Tag 1 to load the experiment script separately. This tells Tag 2 to poll for <code>window.webExperiment</code>.</div>
+          </div>
+        </div>
+
+        <div class="sim-panel" id="sim-tag2-loadorder">
+          <div class="infobox infobox-info" style="margin-bottom:16px;">
+            <div class="infobox-icon">&#9314;</div>
+            <div>In the Load Order Manager, this tag should be in <strong>"Tags Prioris&eacute;s"</strong> (Step 5) — the default async zone. Do <strong>not</strong> move it to utag Sync.</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="background:#DBEAFE; padding:12px 16px; border-radius:8px; font-size:13px;">
+              <strong style="color:#1E40AF;">utag Sync (Step 1)</strong>
+              <div class="sim-tag-row" style="margin-top:8px; opacity:0.6;">
+                <span class="grip">&#8942;&#8942;</span>
+                <span class="sim-tag-name">Amplitude Web Experiment (Sync)</span>
+                <span class="sim-tag-badge sim-badge-sync">SYNC</span>
+              </div>
+            </div>
+            <div style="background:#EDE9FE; padding:12px 16px; border-radius:8px; font-size:13px;">
+              <strong style="color:#7C3AED;">Tags Prioris&eacute;s (Step 5)</strong>
+              <div class="sim-tag-row" style="margin-top:8px; border-color:#7C3AED;">
+                <span class="grip">&#8942;&#8942;</span>
+                <span class="sim-tag-name">Amplitude Browser SDK (Unified)</span>
+                <span class="sim-tag-badge sim-badge-async">ASYNC</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  'data-mappings': () => `
+    <div class="analogy">
+      <div class="analogy-icon">&#128268;</div>
+      <h4>Mappings are like a wiring diagram</h4>
+      <p>Orange's website speaks one language (their data layer variable names). Amplitude speaks another (its expected property names). Mappings connect the wires between them. You do this in Tealium iQ's "Data Mappings" section for Tag 2.</p>
+    </div>
+
+    <div class="card">
+      <h3>How Mapping Works Internally</h3>
+      <p>When Tealium calls <code>u.send()</code>, the mapping logic at line ~489 iterates over the <code>u.map</code> object. For each key in the map, it checks if <code>data_layer[key]</code> has a value, then uses <code>u.mapFunc()</code> to place it in the right spot in <code>u.data</code>.</p>
+      <p style="margin-top:8px;">For nested destinations like <code>eventProperties.plan_type</code>, <code>mapFunc</code> recursively builds the object: <code>u.data.eventProperties.plan_type = value</code>.</p>
+    </div>
+
+    <div class="card">
+      <h3>Common Mappings for Orange</h3>
+      <table class="mapping-table">
+        <thead>
+          <tr><th>Orange Data Layer Variable</th><th>Maps To (Destination)</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>customer_user_id</code></td><td><code>customer_id</code></td><td>Identifies the logged-in user</td></tr>
+          <tr><td><code>event_name</code></td><td><code>event_type</code></td><td>Custom event name for <code>amplitude.track()</code></td></tr>
+          <tr><td>(static value) <code>EU</code></td><td><code>serverZone</code></td><td>Forces EU data residency</td></tr>
+          <tr><td><code>plan_name</code></td><td><code>eventProperties.plan_name</code></td><td>Event property: which plan</td></tr>
+          <tr><td><code>user_segment</code></td><td><code>set.user_segment</code></td><td>User property: set segment</td></tr>
+          <tr><td><code>first_visit_date</code></td><td><code>setOnce.first_visit_date</code></td><td>User property: set once only</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sim-ui">
+      <div class="sim-ui-titlebar">
+        <div class="sim-dots"><span class="sim-dot-r"></span><span class="sim-dot-y"></span><span class="sim-dot-g"></span></div>
+        Tealium iQ &mdash; Data Mappings (Simulated)
+      </div>
+      <div class="sim-ui-body">
+        <div class="infobox infobox-info" style="margin-bottom:16px;">
+          <div class="infobox-icon">&#128161;</div>
+          <div>In Tealium iQ, open your Amplitude tag, go to <strong>Data Mappings</strong>. Select a source variable on the left, a destination on the right, then click <strong>+ Add Mapping</strong>.</div>
+        </div>
+        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+          <div style="flex:1; min-width:150px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-secondary);">Source (Data Layer Variable)</label>
+            <select style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; font-size:12px;">
+              <option>customer_user_id</option>
+              <option>event_name</option>
+              <option>plan_name</option>
+              <option>user_segment</option>
+            </select>
+          </div>
+          <div style="font-size:20px; color:var(--text-secondary); padding-top:16px;">&#10132;</div>
+          <div style="flex:1; min-width:150px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-secondary);">Destination (Tag Property)</label>
+            <select style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; font-size:12px;">
+              <option>customer_id</option>
+              <option>event_type</option>
+              <option>eventProperties.*</option>
+              <option>set.*</option>
+              <option>setOnce.*</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" style="margin-top:16px; font-size:12px; padding:8px 14px;">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="infobox infobox-tip">
+      <div class="infobox-icon">&#128161;</div>
+      <div><strong>Key point:</strong> The exact variable names depend on what Orange's developers put in their <code>utag_data</code> object. You'll need their data layer documentation to create the correct mappings. Ask them for it before the on-site visit.</div>
+    </div>
+  `,
+
+  'code-deep-dive': () => `
+    <div class="card">
+      <h3>The template has 6 main sections</h3>
+      <p>Click each tab below to explore the annotated code. You don't need to memorise this — it's reference material for when you need to debug or explain specific behaviour.</p>
+    </div>
+
+    <div class="code-explorer">
+      <div class="code-explorer-tabs">
+        <div class="code-tab active" onclick="switchCodeTab(this, 'ct-queue')">Queue System</div>
+        <div class="code-tab" onclick="switchCodeTab(this, 'ct-plugins')">Plugin Loading</div>
+        <div class="code-tab" onclick="switchCodeTab(this, 'ct-init')">SDK Init</div>
+        <div class="code-tab" onclick="switchCodeTab(this, 'ct-events')">Event Callback</div>
+        <div class="code-tab" onclick="switchCodeTab(this, 'ct-send')">u.send()</div>
+        <div class="code-tab" onclick="switchCodeTab(this, 'ct-utm')">UTM Handling</div>
+      </div>
+
+      <div class="code-block active" id="ct-queue">
+<div class="code-annotation">The queue system prevents events from being lost if they fire before the Amplitude SDK is ready. Every event is snapshotted and stored, then replayed in order once the SDK initialises.</div>
+<span class="code-var">u.amplitudeReady</span> = <span class="code-keyword">false</span>;
+<span class="code-var">u.pending</span> = [];
+
+<span class="code-var">u.enqueue</span> = <span class="code-keyword">function</span>(<span class="code-var">fn</span>, <span class="code-var">dataSnapshot</span>) {
+  <span class="code-comment">// Store the function AND a copy of the data at this moment</span>
+  u.pending.<span class="code-func">push</span>({ fn: fn, data: dataSnapshot });
+};
+
+<span class="code-var">u.drain</span> = <span class="code-keyword">function</span>() {
+  <span class="code-comment">// Splice empties the array and returns all items</span>
+  <span class="code-keyword">var</span> q = u.pending.<span class="code-func">splice</span>(<span class="code-num">0</span>, u.pending.length);
+  <span class="code-keyword">for</span> (<span class="code-keyword">var</span> i = <span class="code-num">0</span>; i &lt; q.length; i++) {
+    u.data = q[i].data;  <span class="code-comment">// Restore the snapshot</span>
+    q[i].<span class="code-func">fn</span>();           <span class="code-comment">// Execute the original function</span>
+  }
+};
+<div class="code-annotation">Why snapshot? If a page view fires, then a click fires 50ms later (before the SDK is ready), both events write to <code>u.data</code>. Without snapshots, the second write overwrites the first. With snapshots, each event's data is frozen at queue time.</div>
+      </div>
+
+      <div class="code-block" id="ct-plugins">
+<div class="code-annotation">After the core Amplitude SDK script loads, this function loads all plugin scripts in parallel using <code>Promise.all</code>. The key detail: it uses <code>resolve(false)</code> instead of <code>reject()</code> on error, so one CDN failure doesn't block everything.</div>
+<span class="code-var">u.sdkLoaderCallback</span> = <span class="code-keyword">function</span>() {
+  <span class="code-keyword">var</span> cdnBase = <span class="code-string">"https://cdn.eu.amplitude.com"</span>;
+
+  Promise.<span class="code-func">all</span>([
+    <span class="code-comment">// Plugin 1: Session Replay</span>
+    u.<span class="code-func">toBoolean</span>(u.data.session_replay) &&
+      u.<span class="code-func">loadScript</span>(sessionReplayUrl),
+
+    <span class="code-comment">// Plugin 2: Guides & Surveys</span>
+    u.<span class="code-func">toBoolean</span>(u.data.guides_and_surveys) &&
+      u.<span class="code-func">loadScript</span>(cdnBase + <span class="code-string">"/script/"</span> + apiKey + <span class="code-string">".engagement.js"</span>),
+
+    <span class="code-comment">// Plugin 3: Web Experiment (POLLED, not loaded here)</span>
+    u.<span class="code-func">toBoolean</span>(u.data.web_experiment) && <span class="code-keyword">new</span> Promise(<span class="code-keyword">function</span>(resolve) {
+      <span class="code-comment">// Poll every 50ms for up to 3 seconds</span>
+      (<span class="code-keyword">function</span> <span class="code-func">poll</span>() {
+        <span class="code-keyword">if</span> (window.webExperiment) { resolve(); }
+        <span class="code-keyword">else if</span> (Date.now() - start > <span class="code-num">3000</span>) { resolve(); }
+        <span class="code-keyword">else</span> { setTimeout(poll, <span class="code-num">50</span>); }
+      })();
+    })
+  ]).then(<span class="code-keyword">function</span>() {
+    u.<span class="code-func">loaderCallback</span>(initConfig);
+  });
+};
+<div class="code-annotation">Notice the Web Experiment is <strong>polled</strong>, not loaded. Tag 1 already loaded it synchronously. This code just waits for it to be available (up to 3 seconds), then proceeds.</div>
+      </div>
+
+      <div class="code-block" id="ct-init">
+<div class="code-annotation">Plugin registration order is critical. ALL plugins must be added via <code>amplitude.add()</code> BEFORE <code>amplitude.init()</code> is called. Init triggers autocaptured events, and the experiment plugin must be listening by then.</div>
+<span class="code-comment">// 1. Register Session Replay</span>
+amplitude.<span class="code-func">add</span>(window.sessionReplay.<span class="code-func">plugin</span>());
+
+<span class="code-comment">// 2. Register Guides & Surveys</span>
+amplitude.<span class="code-func">add</span>(window.engagement.<span class="code-func">plugin</span>());
+
+<span class="code-comment">// 3. Register Web Experiment</span>
+amplitude.<span class="code-func">add</span>(window.webExperiment.<span class="code-func">plugin</span>());
+
+<span class="code-comment">// 4. NOW initialise (autocaptured page views fire after this)</span>
+<span class="code-keyword">var</span> initResult = amplitude.<span class="code-func">init</span>(apiKey, customerId, config);
+
+initResult.promise.<span class="code-func">then</span>(<span class="code-keyword">function</span>() {
+  u.amplitudeReady = <span class="code-keyword">true</span>;
+  u.<span class="code-func">drain</span>();  <span class="code-comment">// Process all queued events</span>
+});
+<div class="code-annotation">If <code>amplitude.init()</code> returns a promise, we wait for it. If not (older SDKs), we fall back to polling <code>u.isSDKReady()</code> every 50ms for up to 5 seconds.</div>
+      </div>
+
+      <div class="code-block" id="ct-events">
+<div class="code-annotation">This is called for every Tealium event (page view or link click). It sends user properties, tracks events, sets groups, and processes e-commerce revenue.</div>
+<span class="code-var">u.callback</span> = <span class="code-keyword">function</span>() {
+  <span class="code-comment">// Opt-out check</span>
+  amplitude.<span class="code-func">setOptOut</span>(u.<span class="code-func">toBoolean</span>(u.data.optOut));
+
+  <span class="code-comment">// User properties (set, setOnce, add, append, prepend, unset)</span>
+  <span class="code-keyword">if</span> (u.data.set) {
+    <span class="code-keyword">var</span> id = <span class="code-keyword">new</span> amplitude.<span class="code-func">Identify</span>();
+    Object.<span class="code-func">keys</span>(u.data.set).<span class="code-func">forEach</span>(<span class="code-keyword">function</span>(key) {
+      id.<span class="code-func">set</span>(key, u.data.set[key]);
+    });
+    amplitude.<span class="code-func">identify</span>(id);
+  }
+
+  <span class="code-comment">// Custom event</span>
+  <span class="code-keyword">if</span> (u.data.event_type) {
+    amplitude.<span class="code-func">track</span>({
+      event_type: u.data.event_type,
+      event_properties: u.data.eventProperties
+    });
+  }
+
+  <span class="code-comment">// Revenue (loops through product arrays)</span>
+  u.data.product_id.<span class="code-func">forEach</span>(<span class="code-keyword">function</span>(productId, index) {
+    <span class="code-keyword">var</span> rev = <span class="code-keyword">new</span> amplitude.<span class="code-func">Revenue</span>()
+      .<span class="code-func">setProductId</span>(productId)
+      .<span class="code-func">setPrice</span>(price[index])
+      .<span class="code-func">setQuantity</span>(qty[index]);
+    amplitude.<span class="code-func">revenue</span>(rev);
+  });
+};
+      </div>
+
+      <div class="code-block" id="ct-send">
+<div class="code-annotation"><code>u.send()</code> is the main entry point — Tealium calls this for every event. It builds the data object, applies mappings, handles e-commerce, validates config, and either fires immediately or queues for later.</div>
+<span class="code-var">u.send</span> = <span class="code-keyword">function</span>(utag_event, data_layer) {
+  <span class="code-comment">// 1. Build u.data with defaults</span>
+  u.data = { base_url: <span class="code-string">"...zoning-alpha..."</span>, api_key: <span class="code-string">"##UTVARconfig_api_key##"</span>, ... };
+
+  <span class="code-comment">// 2. Tealium extensions run here (##UTEXTEND##)</span>
+
+  <span class="code-comment">// 3. Apply data mappings (data layer → u.data)</span>
+  Object.<span class="code-func">keys</span>(u.map).<span class="code-func">forEach</span>(<span class="code-keyword">function</span>(key) {
+    <span class="code-keyword">if</span> (data_layer[key]) {
+      u.<span class="code-func">mapFunc</span>(destination, u.data, data_layer[key]);
+    }
+  });
+
+  <span class="code-comment">// 4. Validate — stop if no API key</span>
+  <span class="code-keyword">if</span> (!u.data.api_key) <span class="code-keyword">return</span>;
+
+  <span class="code-comment">// 5. Snapshot data to prevent race conditions</span>
+  <span class="code-keyword">var</span> snapshot = JSON.<span class="code-func">parse</span>(JSON.<span class="code-func">stringify</span>(u.data));
+
+  <span class="code-comment">// 6. Fire or queue</span>
+  <span class="code-keyword">if</span> (u.amplitudeReady) {
+    u.<span class="code-func">callback</span>();  <span class="code-comment">// Fire immediately</span>
+  } <span class="code-keyword">else</span> {
+    u.<span class="code-func">enqueue</span>(runWork, snapshot);  <span class="code-comment">// Queue for later</span>
+    <span class="code-comment">// Load SDK on first call only</span>
+    <span class="code-keyword">if</span> (!u.scriptrequested) { <span class="code-comment">/* load amplitude SDK script */</span> }
+  }
+};
+      </div>
+
+      <div class="code-block" id="ct-utm">
+<div class="code-annotation">The tag dynamically discovers UTM parameters from the data layer — it doesn't just check the 5 standard ones. It finds any key starting with <code>utm_</code> or <code>qp.utm_</code> and automatically includes them as event properties.</div>
+<span class="code-var">u.collectUtmKeysSetFromObjectKeys</span> = <span class="code-keyword">function</span>(obj) {
+  Object.<span class="code-func">keys</span>(obj).<span class="code-func">forEach</span>(<span class="code-keyword">function</span>(rawKey) {
+    <span class="code-keyword">var</span> key = rawKey.<span class="code-func">toLowerCase</span>();
+    <span class="code-keyword">if</span> (key.<span class="code-func">indexOf</span>(<span class="code-string">"qp.utm_"</span>) === <span class="code-num">0</span>) {
+      utmKeysSet[key.<span class="code-func">slice</span>(<span class="code-num">3</span>)] = <span class="code-keyword">true</span>;  <span class="code-comment">// "qp.utm_source" → "utm_source"</span>
+    } <span class="code-keyword">else if</span> (key.<span class="code-func">indexOf</span>(<span class="code-string">"utm_"</span>) === <span class="code-num">0</span>) {
+      utmKeysSet[key] = <span class="code-keyword">true</span>;
+    }
+  });
+};
+<div class="code-annotation">The <code>qp.</code> prefix is a Tealium convention — query parameter values are automatically available as <code>qp.&lt;param_name&gt;</code> in the data layer. So <code>?utm_source=google</code> becomes <code>data_layer["qp.utm_source"] = "google"</code>.</div>
+      </div>
+    </div>
+  `,
+
+  'init-sequence': () => `
+    <div class="card">
+      <h3>What happens when a user visits an Orange page</h3>
+      <p>Click the button to watch the full initialisation sequence animate step by step.</p>
+    </div>
+
+    <button class="play-btn" onclick="playSequence()">&#9654; Play Sequence</button>
+
+    <div class="sequence-container" id="seqContainer">
+      <div class="sequence-step" data-seq="0"><div class="seq-num">1</div><div><strong>Browser requests the page</strong><br><span style="font-size:12px; color:var(--text-secondary);">HTML starts loading. &lt;head&gt; includes the utag.js script.</span></div></div>
+      <div class="sequence-step" data-seq="1"><div class="seq-num">2</div><div><strong>utag.js loads</strong><br><span style="font-size:12px; color:var(--text-secondary);">Tealium's container script begins execution.</span></div></div>
+      <div class="sequence-step" data-seq="2"><div class="seq-num">3</div><div><strong>Step 1: utag Sync executes</strong><br><span style="font-size:12px; color:var(--text-secondary);">Tag 1 (experiment.js) loads synchronously. Sets <code>window.webExperiment</code>.</span></div></div>
+      <div class="sequence-step" data-seq="3"><div class="seq-num">4</div><div><strong>Steps 2-4: Tealium processing</strong><br><span style="font-size:12px; color:var(--text-secondary);">Data layer is read, extensions run, mappings prepared.</span></div></div>
+      <div class="sequence-step" data-seq="4"><div class="seq-num">5</div><div><strong>Step 5: Tag 2's u.send() is called</strong><br><span style="font-size:12px; color:var(--text-secondary);">Tealium passes the data layer to the Amplitude tag template.</span></div></div>
+      <div class="sequence-step" data-seq="5"><div class="seq-num">6</div><div><strong>u.send() builds u.data and loads the SDK</strong><br><span style="font-size:12px; color:var(--text-secondary);">The Amplitude snippet is injected, then the SDK script starts loading asynchronously.</span></div></div>
+      <div class="sequence-step" data-seq="6"><div class="seq-num">7</div><div><strong>sdkLoaderCallback fires (SDK loaded)</strong><br><span style="font-size:12px; color:var(--text-secondary);">Promise.all starts: loads Session Replay + Guides & Surveys in parallel, polls for webExperiment.</span></div></div>
+      <div class="sequence-step" data-seq="7"><div class="seq-num">8</div><div><strong>All plugins ready</strong><br><span style="font-size:12px; color:var(--text-secondary);">Session Replay, Guides & Surveys, and Web Experiment are all available.</span></div></div>
+      <div class="sequence-step" data-seq="8"><div class="seq-num">9</div><div><strong>loaderCallback: register plugins</strong><br><span style="font-size:12px; color:var(--text-secondary);">amplitude.add() called for each plugin. Order: Session Replay → Guides → Web Experiment.</span></div></div>
+      <div class="sequence-step" data-seq="9"><div class="seq-num">10</div><div><strong>amplitude.init() called</strong><br><span style="font-size:12px; color:var(--text-secondary);">SDK initialises. Autocaptured [Amplitude] Page Viewed fires. Web Experiment Page Triggers work.</span></div></div>
+      <div class="sequence-step" data-seq="10"><div class="seq-num">11</div><div><strong>Queue drains</strong><br><span style="font-size:12px; color:var(--text-secondary);">amplitudeReady = true. Any events that fired during loading are now replayed in order.</span></div></div>
+    </div>
+  `,
+
+  'verification': () => `
+    <div class="card">
+      <h3>Post-Publish Verification</h3>
+      <p>After publishing in Tealium iQ (to Dev/QA first!), open the site in Chrome and check each of the following. Click items to mark them as verified.</p>
+    </div>
+
+    <div class="card">
+      <h3>&#127760; Network Tab Checks</h3>
+      <ul class="checklist" id="checklist-network">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text"><code>&lt;API_KEY&gt;.experiment.js</code> loads first (check the Waterfall — it should be among the earliest requests)</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text"><code>analytics-browser-2.34.1-feat-zoning-alpha.0-min.js.gz</code> loads (the main Amplitude SDK)</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text"><code>plugin-session-replay-browser-*.js</code> loads (if Session Replay is enabled)</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text"><code>*.engagement.js</code> loads (if Guides & Surveys is enabled)</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">Requests to <code>api2.eu.amplitude.com</code> return <strong>200 OK</strong></span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">No requests going to <code>api2.amplitude.com</code> (US endpoint) — all should be <code>.eu.</code></span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>&#128187; Console Checks (filter: "utag")</h3>
+      <ul class="checklist" id="checklist-console">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text"><code>webExperiment already available</code> or <code>webExperiment available after Xms</code></span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text"><code>Session Replay plugin registered</code></span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text"><code>Web Experiment plugin registered</code></span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">No <code>webExperiment not available after 3000ms</code> warning</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text"><code>CALLBACK:COMPLETE</code> messages appear (events being sent)</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>&#128202; Amplitude Dashboard Checks</h3>
+      <ul class="checklist" id="checklist-amp">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text"><code>[Amplitude] Page Viewed</code> events appear in Live Events</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text"><code>[Amplitude] Session Start</code> events appear</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">User properties are being set correctly</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">Experiment impressions fire for users matching Page Trigger conditions</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">Events show the EU flag (data residency correct)</span></li>
+      </ul>
+    </div>
+  `,
+
+  'troubleshooting': () => `
+    <div class="card">
+      <h3>Common Issues & Solutions</h3>
+      <p>Click each issue to expand the diagnosis and fix.</p>
+    </div>
+
+    <div class="expandable">
+      <div class="expand-header" onclick="toggleExpand(this)">
+        <span>&#128308; No events appearing at all</span><span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="expand-body">
+        <p><strong>Most likely cause:</strong> Missing or incorrect <code>api_key</code>.</p>
+        <p><strong>Diagnosis:</strong> Open DevTools Console, filter for "utag". Look for <code>"Tag not fired: Required attribute not populated"</code>.</p>
+        <p><strong>Fix:</strong> Check the tag configuration in Tealium iQ. The <code>api_key</code> config variable must match the Amplitude project key exactly.</p>
+      </div>
+    </div>
+
+    <div class="expandable">
+      <div class="expand-header" onclick="toggleExpand(this)">
+        <span>&#128308; Events sent but not visible in Amplitude</span><span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="expand-body">
+        <p><strong>Most likely cause:</strong> Wrong <code>serverZone</code> — events going to US instead of EU (or vice versa).</p>
+        <p><strong>Diagnosis:</strong> Check the Network tab for request URLs. If you see <code>api2.amplitude.com</code> instead of <code>api2.eu.amplitude.com</code>, the zone is wrong.</p>
+        <p><strong>Fix:</strong> Ensure <code>serverZone</code> is mapped to the static value <code>EU</code> in data mappings.</p>
+      </div>
+    </div>
+
+    <div class="expandable">
+      <div class="expand-header" onclick="toggleExpand(this)">
+        <span>&#128992; "webExperiment not available after 3000ms"</span><span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="expand-body">
+        <p><strong>Most likely cause:</strong> Tag 1 is not loading, or not loading synchronously.</p>
+        <p><strong>Diagnosis:</strong> Check the Network tab — is <code>experiment.js</code> loading? Check Load Order Manager — is Tag 1 in utag Sync?</p>
+        <p><strong>Fix:</strong> Verify Tag 1 is in the utag Sync zone (Step 1) and has the correct script URL. Also verify the trigger is set to All Pages.</p>
+      </div>
+    </div>
+
+    <div class="expandable">
+      <div class="expand-header" onclick="toggleExpand(this)">
+        <span>&#128992; Page Triggers not firing (~45% miss rate)</span><span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="expand-body">
+        <p><strong>Most likely cause:</strong> Web Experiment plugin registered <em>after</em> <code>amplitude.init()</code>.</p>
+        <p><strong>Diagnosis:</strong> This was the original bug that motivated the two-tag architecture. If the experiment plugin isn't registered before init, the autocaptured Page Viewed event fires without the plugin listening.</p>
+        <p><strong>Fix:</strong> Ensure <code>web_experiment</code> is set to <code>true</code> in Tag 2's config, AND Tag 1 is loading synchronously. The console should show "Web Experiment plugin registered" <em>before</em> any event tracking messages.</p>
+      </div>
+    </div>
+
+    <div class="expandable">
+      <div class="expand-header" onclick="toggleExpand(this)">
+        <span>&#128993; Session Replay not recording</span><span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="expand-body">
+        <p><strong>Check:</strong> Is <code>session_replay</code> set to <code>true</code>? Is <code>session_replay_version</code> set to a valid version?</p>
+        <p><strong>Diagnosis:</strong> Look for the Session Replay script in the Network tab. Check for "Session Replay plugin registered" in the console.</p>
+        <p><strong>Fix:</strong> Update the config variables. If the script 404s, the version number may be wrong.</p>
+      </div>
+    </div>
+
+    <div class="expandable">
+      <div class="expand-header" onclick="toggleExpand(this)">
+        <span>&#128993; Tag seems to hang / never initialises</span><span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="expand-body">
+        <p><strong>Most likely cause:</strong> A CDN script failed to load and the Promise chain is stuck.</p>
+        <p><strong>Good news:</strong> The tag has onerror handling — <code>u.loadScript</code> resolves (not rejects) on error, so <code>Promise.all</code> should still proceed. If it's truly stuck, check for network-level blocks (e.g. a corporate firewall blocking <code>cdn.eu.amplitude.com</code>).</p>
+      </div>
+    </div>
+  `,
+
+  'quiz': () => `
+    <div class="card" style="border-left: 4px solid var(--warning);">
+      <h3>Test Your Knowledge</h3>
+      <p>8 questions covering everything you've learned. Don't worry about getting them all right — the explanations are the valuable part.</p>
+    </div>
+
+    ${buildQuiz()}
+
+    <div id="quizResults" style="display:none; margin-top:20px;">
+      <div class="card" style="text-align:center; border-left: 4px solid var(--success);">
+        <h3 id="quizScore"></h3>
+        <p id="quizFeedback"></p>
+      </div>
+      <div class="confidence-widget" style="margin-top:16px;">
+        <h4>How confident do you feel now?</h4>
+        <div class="confidence-faces">
+          <div class="confidence-face" onclick="setConfidence(this, 1)" title="Very unsure">&#128531;</div>
+          <div class="confidence-face" onclick="setConfidence(this, 2)" title="Nervous">&#128533;</div>
+          <div class="confidence-face" onclick="setConfidence(this, 3)" title="Neutral">&#128528;</div>
+          <div class="confidence-face" onclick="setConfidence(this, 4)" title="Getting there">&#128578;</div>
+          <div class="confidence-face" onclick="setConfidence(this, 5)" title="Confident">&#128513;</div>
+        </div>
+        <div class="confidence-label">Compare with your answer at the start!</div>
+      </div>
+    </div>
+  `
+};
+
+// ── Quiz Data ──
+const quizData = [
+  {
+    q: "What is the primary role of Tealium iQ in this implementation?",
+    opts: ["It replaces Amplitude entirely", "It's a tag management system that loads and configures the Amplitude SDK without code changes on the website", "It's a CDN that hosts Amplitude's scripts", "It's Orange's own analytics tool"],
+    correct: 1,
+    expl: "Tealium iQ is a tag management system (TMS). It loads vendor scripts (like Amplitude), maps the website's data layer to vendor-specific properties, and manages the firing rules — all from a UI, without touching the website's source code."
+  },
+  {
+    q: "Why does the Web Experiment script need to be a separate synchronous tag (Tag 1)?",
+    opts: ["It's too large to include in the main tag", "Synchronous loading prevents anti-flicker issues and ensures the experiment plugin is available before amplitude.init() fires autocaptured events", "It's a Tealium requirement for all experiment tools", "It reduces the total page load time"],
+    correct: 1,
+    expl: "The experiment script must load synchronously to: (1) apply visual A/B test changes before the page renders (preventing flickering), and (2) be registered as a plugin before amplitude.init() triggers the first [Amplitude] Page Viewed event, which Page Triggers depend on."
+  },
+  {
+    q: "In which Tealium Load Order zone should Tag 1 (Web Experiment) be placed?",
+    opts: ["Tags Priorisés (Step 5)", "utag Sync (Step 1)", "Extensions (Step 3)", "After utag.js (Step 2)"],
+    correct: 1,
+    expl: "utag Sync (Step 1) is the synchronous zone. Scripts here execute before any async tags. This guarantees window.webExperiment is set before Tag 2 starts."
+  },
+  {
+    q: "What happens if the Web Experiment script hasn't loaded after 3 seconds?",
+    opts: ["The entire tag crashes", "The tag waits indefinitely", "The tag proceeds without the Web Experiment plugin (graceful degradation)", "Tealium retries loading the script"],
+    correct: 2,
+    expl: "The polling loop in sdkLoaderCallback resolves the promise after 3 seconds regardless, logging a warning. The SDK initialises without the experiment plugin — analytics still works, but Page Triggers won't fire on autocaptured events."
+  },
+  {
+    q: "Why does the tag snapshot u.data with JSON.parse(JSON.stringify(u.data))?",
+    opts: ["To compress the data for faster transmission", "To convert the data to a string format Amplitude requires", "To prevent race conditions where rapid successive events overwrite each other's data", "To remove sensitive data before sending"],
+    correct: 2,
+    expl: "If a page view fires and then a click fires 50ms later (both before the SDK is ready), both would write to the same u.data object. Without deep-cloning, the second event's data would overwrite the first's. The snapshot freezes each event's data at queue time."
+  },
+  {
+    q: "What does 'EU Data Residency' mean for this implementation?",
+    opts: ["The website is only accessible from EU countries", "All scripts and event data use EU endpoints (cdn.eu.amplitude.com, api2.eu.amplitude.com) for GDPR compliance", "EU users see a different version of the website", "Amplitude stores a backup in the EU"],
+    correct: 1,
+    expl: "Orange requires GDPR compliance. EU data residency means all Amplitude scripts are loaded from EU CDN servers, and all analytics data is sent to and stored in Amplitude's EU data centre. The serverZone must be set to 'EU'."
+  },
+  {
+    q: "What would you check first if events appear in Amplitude's US project but not the EU project?",
+    opts: ["The api_key is wrong", "The serverZone mapping is missing or not set to 'EU'", "The Session Replay plugin is broken", "The browser doesn't support promises"],
+    correct: 1,
+    expl: "If events are going to the US project, the serverZone is either not mapped or not set to 'EU'. Check the data mappings in Tag 2 — there should be a static mapping of 'EU' to the serverZone destination."
+  },
+  {
+    q: "What is the correct order of operations at initialisation time?",
+    opts: [
+      "amplitude.init() → register plugins → load scripts",
+      "Load scripts → register plugins → amplitude.init() → drain queue",
+      "amplitude.init() → load scripts → drain queue → register plugins",
+      "Register plugins → load scripts → amplitude.init()"
+    ],
+    correct: 1,
+    expl: "The sequence is: (1) load all plugin scripts in parallel, (2) register all plugins with amplitude.add(), (3) call amplitude.init() — which triggers autocaptured events, (4) when init resolves, set amplitudeReady=true and drain the queue."
+  }
+];
+
+function buildQuiz() {
+  return quizData.map((q, i) => `
+    <div class="quiz-question" id="quiz-${i}">
+      <div class="quiz-q">${i + 1}. ${q.q}</div>
+      <div class="quiz-options">
+        ${q.opts.map((opt, j) => `
+          <div class="quiz-option" onclick="answerQuiz(${i}, ${j})">${opt}</div>
+        `).join('')}
+      </div>
+      <div class="quiz-explanation" id="quiz-expl-${i}">${q.expl}</div>
+    </div>
+  `).join('');
+}
+
+function answerQuiz(qIdx, aIdx) {
+  if (quizAnswers[qIdx] !== undefined) return;
+  quizAnswers[qIdx] = aIdx;
+  const container = document.getElementById(`quiz-${qIdx}`);
+  const opts = container.querySelectorAll('.quiz-option');
+  const expl = document.getElementById(`quiz-expl-${qIdx}`);
+  const correct = quizData[qIdx].correct;
+
+  opts.forEach((o, j) => {
+    if (j === correct) o.classList.add('correct');
+    if (j === aIdx && j !== correct) o.classList.add('wrong');
+    o.style.pointerEvents = 'none';
+  });
+
+  expl.classList.add('show');
+  expl.classList.add(aIdx === correct ? 'correct-expl' : 'wrong-expl');
+
+  if (Object.keys(quizAnswers).length === quizData.length) {
+    const score = Object.entries(quizAnswers).filter(([k, v]) => v === quizData[k].correct).length;
+    const results = document.getElementById('quizResults');
+    results.style.display = 'block';
+    document.getElementById('quizScore').textContent = `${score} / ${quizData.length} correct`;
+    const pct = score / quizData.length;
+    document.getElementById('quizFeedback').textContent =
+      pct === 1 ? "Perfect score! You're ready for the on-site visit." :
+      pct >= 0.75 ? "Great job! Review the explanations for the ones you missed." :
+      pct >= 0.5 ? "Good start — re-read the sections for the topics you missed." :
+      "No worries — go back through the guide and try again. The explanations above are the real learning.";
+    results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+// ── Render Section ──
+function renderSection(idx) {
+  currentSection = idx;
+  const s = sections[idx];
+  const main = document.getElementById('mainContent');
+
+  let html = `<div class="section active">
+    <div class="section-header">
+      <div class="section-badge ${s.badge.cls}">${s.badge.text}</div>
+      <h1 class="section-title">${s.fullTitle}</h1>
+      <p class="section-subtitle">${s.subtitle}</p>
+    </div>
+    ${sectionContent[s.id]()}
+    <div class="nav-buttons">
+      ${idx > 0 ? `<button class="btn btn-secondary" onclick="goToSection(${idx - 1})">&#8592; ${sections[idx-1].title}</button>` : '<div></div>'}
+      ${idx < sections.length - 1 ?
+        `<button class="btn btn-primary" onclick="markCompleteAndNext(${idx})">Mark Complete & Next &#8594;</button>` :
+        `<button class="btn btn-success" onclick="markCompleteAndNext(${idx})">&#10003; Finish Guide</button>`
+      }
+    </div>
+  </div>`;
+
+  main.innerHTML = html;
+  buildSidebar();
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goToSection(idx) {
+  renderSection(idx);
+}
+
+function markCompleteAndNext(idx) {
+  completedSections.add(idx);
+  if (idx < sections.length - 1) {
+    renderSection(idx + 1);
+  } else {
+    buildSidebar();
+    updateProgress();
+  }
+}
+
+function updateProgress() {
+  const pct = (completedSections.size / sections.length) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${completedSections.size} / ${sections.length} complete`;
+}
+
+// ── Interactive Helpers ──
+function toggleExpand(header) {
+  const body = header.nextElementSibling;
+  header.classList.toggle('open');
+  body.classList.toggle('open');
+}
+
+function switchSimTab(tab, panelId) {
+  const nav = tab.parentElement;
+  nav.querySelectorAll('.sim-ui-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  const body = nav.parentElement;
+  body.querySelectorAll('.sim-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
+}
+
+function switchCodeTab(tab, blockId) {
+  tab.parentElement.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  const explorer = tab.closest('.code-explorer');
+  explorer.querySelectorAll('.code-block').forEach(b => b.classList.remove('active'));
+  document.getElementById(blockId).classList.add('active');
+}
+
+var diagramDetails = {
+  website: { label: 'Orange Website', text: 'The Orange website includes <code>utag.js</code> in its <code>&lt;head&gt;</code>. This single script file is generated by Tealium and contains all tag configurations. Orange\'s developers maintain the data layer (<code>utag_data</code>) — you never edit their site code directly.' },
+  tealium: { label: 'Tealium iQ (utag.js)', text: 'Tealium\'s container script. When it loads, it executes the Load Order: first synchronous tags (Step 1), then processes extensions and the data layer, then fires prioritised async tags (Step 5). It passes the data layer to each tag via <code>u.send(event, data_layer)</code>.' },
+  tag1: { label: 'Tag 1 — Web Experiment (Synchronous)', text: '<strong>Loads first (Step 1 — utag Sync).</strong> This small script sets <code>window.webExperiment</code> globally. Because it\'s synchronous, the browser waits for it to finish before moving on. It must be ready before Tag 2 initialises so that A/B test Page Triggers work on the very first autocaptured page view.' },
+  tag2: { label: 'Tag 2 — Amplitude Browser SDK (Async)', text: '<strong>Loads second (Step 5 — Tags Priorisés).</strong> This is the <code>tealium_template.js</code> file you\'re learning about. It loads the Amplitude SDK, then in parallel loads Session Replay + Guides & Surveys scripts while polling for <code>window.webExperiment</code>. Once everything is ready, it registers all plugins and calls <code>amplitude.init()</code>.' },
+  amplitude: { label: 'Amplitude (EU Endpoint)', text: 'Amplitude\'s EU ingestion endpoint at <code>api2.eu.amplitude.com</code>. All events, user properties, revenue data, and session replays are sent here. The EU <code>serverZone</code> setting ensures GDPR compliance — no data leaves the EU.' }
+};
+
+function showDiagramDetail(node, key) {
+  var container = node.closest('.diagram-container');
+  container.querySelectorAll('.diagram-node').forEach(function(n) { n.classList.remove('highlight'); });
+  node.classList.add('highlight');
+
+  var panel = document.getElementById('diagramDetailPanel');
+  var info = diagramDetails[key];
+  panel.innerHTML = '<div class="detail-label">' + info.label + '</div><div class="detail-text">' + info.text + '</div>';
+  panel.style.animation = 'none';
+  panel.offsetHeight;
+  panel.style.animation = 'fadeIn 0.25s ease';
+}
+
+function toggleCheck(box) {
+  box.classList.toggle('checked');
+  const text = box.nextElementSibling;
+  text.classList.toggle('done');
+  box.innerHTML = box.classList.contains('checked') ? '&#10003;' : '';
+}
+
+function setConfidence(face, level) {
+  face.parentElement.querySelectorAll('.confidence-face').forEach(f => f.classList.remove('selected'));
+  face.classList.add('selected');
+}
+
+const loadStepDetails = [
+  { title: 'Step 1: utag Sync', text: 'Scripts here are injected directly into utag.js and execute synchronously. The browser waits for them to finish before continuing. This is where Tag 1 (Web Experiment) lives, guaranteeing window.webExperiment is set before anything else runs.' },
+  { title: 'Step 2: utag.js Container Logic', text: 'The Tealium container script itself runs — reading the data layer (utag_data), evaluating configuration, and preparing the internal state for extensions and tags.' },
+  { title: 'Step 3: Pre-Loader Extensions', text: 'Tag-scoped and profile-scoped extensions run here. These can transform, enrich, or filter data layer variables before tags receive them. The ##UTEXTEND## placeholder in the template is replaced with these.' },
+  { title: 'Step 4: Data Layer Processing', text: 'The final data layer is prepared. All enrichments from extensions are applied, and the data is ready to be passed to tags.' },
+  { title: 'Step 5: Tags Priorisés (Async)', text: 'Asynchronous tags fire here. Tag 2 (Amplitude SDK) lives in this zone. It loads in the background without blocking page rendering. By this point, Tag 1 has already finished loading synchronously.' }
+];
+
+function selectLoadStep(el, idx) {
+  el.parentElement.querySelectorAll('.load-step').forEach(s => s.classList.remove('highlight'));
+  el.classList.add('highlight');
+  const detail = document.getElementById('loadStepDetail');
+  detail.querySelector('h3').textContent = loadStepDetails[idx].title;
+  detail.querySelector('p').innerHTML = loadStepDetails[idx].text;
+}
+
+let seqPlaying = false;
+function playSequence() {
+  if (seqPlaying) return;
+  seqPlaying = true;
+  const steps = document.querySelectorAll('.sequence-step');
+  steps.forEach(s => { s.classList.remove('active', 'done'); });
+  let i = 0;
+  function next() {
+    if (i > 0) steps[i - 1].classList.replace('active', 'done');
+    if (i < steps.length) {
+      steps[i].classList.add('active');
+      steps[i].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      i++;
+      setTimeout(next, 1200);
+    } else {
+      seqPlaying = false;
+    }
+  }
+  next();
+}
+
+// ── Init ──
+renderSection(0);
+</script>
+</body>
+</html>
