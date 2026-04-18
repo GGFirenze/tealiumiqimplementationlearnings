@@ -569,6 +569,71 @@
 
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
   @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── JS Dictionary ── */
+  .badge-js { background: #FEF9C3; color: #A16207; }
+  .dict-entry {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 16px;
+    overflow: hidden; transition: all var(--transition);
+  }
+  .dict-entry:hover { box-shadow: var(--shadow-lg); }
+  .dict-entry-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px; cursor: pointer;
+    transition: background var(--transition);
+  }
+  .dict-entry-header:hover { background: #FEFCE8; }
+  .dict-entry-header.open { background: #FEFCE8; border-bottom: 1px solid var(--border); }
+  .dict-entry-code {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 13.5px; font-weight: 600; color: #7C3AED;
+    background: #F3E8FF; padding: 3px 10px; border-radius: 6px;
+  }
+  .dict-entry-title { font-size: 14px; font-weight: 600; flex: 1; }
+  .dict-entry-level {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; padding: 3px 8px; border-radius: 4px;
+  }
+  .level-basic { background: #DCFCE7; color: #166534; }
+  .level-intermediate { background: #FEF3C7; color: #92400E; }
+  .level-pattern { background: #E0E7FF; color: #3730A3; }
+  .dict-entry-body {
+    display: none; padding: 20px;
+  }
+  .dict-entry-body.open { display: block; animation: fadeIn 0.2s ease; }
+  .dict-section { margin-bottom: 14px; }
+  .dict-section:last-child { margin-bottom: 0; }
+  .dict-section-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.04em; color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+  .dict-section p { font-size: 13.5px; color: var(--text); line-height: 1.65; }
+  .dict-code-block {
+    background: var(--code-bg); color: var(--code-text);
+    padding: 14px 16px; border-radius: 8px;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 12.5px; line-height: 1.7; overflow-x: auto;
+  }
+  .dict-real-world {
+    background: linear-gradient(135deg, #FFF7ED, #FFF0E0);
+    border: 1px solid #FED7AA; border-radius: 8px;
+    padding: 12px 16px; font-size: 13px; color: #9A3412;
+    line-height: 1.6;
+  }
+  .dict-filter-bar {
+    display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .dict-filter {
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface);
+    transition: all var(--transition); color: var(--text-secondary);
+  }
+  .dict-filter:hover { background: var(--bg); }
+  .dict-filter.active { background: #7C3AED; color: white; border-color: #7C3AED; }
+  .dict-entry.filtered { display: none; }
 </style>
 </head>
 <body>
@@ -667,6 +732,14 @@ const sections = [
     badge: { text: 'Code', cls: 'badge-code' },
     fullTitle: 'Inside the Tag Template',
     subtitle: 'An annotated walkthrough of the key sections in tealium_template.js.'
+  },
+  {
+    id: 'js-dictionary',
+    title: 'JS Patterns Guide',
+    group: 'Understanding the Code',
+    badge: { text: 'JS Fundamentals', cls: 'badge-js' },
+    fullTitle: 'JavaScript Patterns Dictionary',
+    subtitle: 'Every pattern used in this codebase, explained from scratch. No CS degree required.'
   },
   {
     id: 'init-sequence',
@@ -1431,6 +1504,527 @@ initResult.promise.<span class="code-func">then</span>(<span class="code-keyword
     </div>
   `,
 
+  'js-dictionary': () => `
+    <div class="analogy">
+      <div class="analogy-icon">&#128218;</div>
+      <h4>You absolutely would learn this in a CS degree — but piece by piece over 2-3 years</h4>
+      <p>The patterns below are things CS students encounter across modules like "Intro to Programming", "Data Structures", "Asynchronous Systems", and "Software Design Patterns". The fact that you're asking about them means you're closing the gap faster than you think. Each entry below shows the pattern, explains it in plain English, shows a minimal example, then points to exactly where it appears in the Orange code.</p>
+    </div>
+
+    <div class="dict-filter-bar">
+      <div class="dict-filter active" onclick="filterDict(this, 'all')">All</div>
+      <div class="dict-filter" onclick="filterDict(this, 'basic')">Basics</div>
+      <div class="dict-filter" onclick="filterDict(this, 'intermediate')">Intermediate</div>
+      <div class="dict-filter" onclick="filterDict(this, 'pattern')">Design Patterns</div>
+    </div>
+
+    <div id="dictEntries">
+
+    <!-- 1. Boolean Flags -->
+    <div class="dict-entry" data-level="basic">
+      <div class="dict-entry-header" onclick="toggleDict(this)">
+        <span class="dict-entry-code">u.amplitudeReady = false</span>
+        <span class="dict-entry-title">Boolean Flag (On/Off Switch)</span>
+        <span class="dict-entry-level level-basic">Basic</span>
+        <span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="dict-entry-body">
+        <div class="dict-section">
+          <div class="dict-section-label">What it is</div>
+          <p>A <strong>boolean flag</strong> is a variable that can only be <code>true</code> or <code>false</code>. It acts like a light switch — it tracks whether something has happened or not. Code elsewhere checks the flag to decide what to do.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Minimal example</div>
+          <div class="dict-code-block">var doorIsOpen = false;
+
+// Later, when someone opens the door:
+doorIsOpen = true;
+
+// Elsewhere, code checks before acting:
+if (doorIsOpen) {
+  walkThrough();
+}</div>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Where it appears in the Orange code</div>
+          <p><code>u.amplitudeReady = false</code> starts as false. Once the Amplitude SDK finishes initialising, it flips to <code>true</code>. Every time an event fires, the code checks: <em>"Is the SDK ready? If yes, send now. If no, queue it for later."</em></p>
+          <p style="margin-top:6px;">Also: <code>u.scriptrequested = false</code> prevents the SDK script from being loaded twice. Once it's requested, it flips to <code>true</code> and the loading code is skipped on subsequent events.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-real-world">&#128161; <strong>Real-world analogy:</strong> It's like the "OPEN" sign on a shop door. The shop (SDK) takes time to set up in the morning. Customers (events) who arrive early wait in a queue outside. Once the sign flips to OPEN, everyone walks in.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Arrays and .push() -->
+    <div class="dict-entry" data-level="basic">
+      <div class="dict-entry-header" onclick="toggleDict(this)">
+        <span class="dict-entry-code">u.pending.push({ fn, data })</span>
+        <span class="dict-entry-title">Arrays &amp; .push() (Adding to a List)</span>
+        <span class="dict-entry-level level-basic">Basic</span>
+        <span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="dict-entry-body">
+        <div class="dict-section">
+          <div class="dict-section-label">What it is</div>
+          <p>An <strong>array</strong> is an ordered list. <code>.push()</code> adds an item to the end of that list. Think of it as a to-do list where you keep appending tasks to the bottom.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Minimal example</div>
+          <div class="dict-code-block">var shoppingList = [];
+
+shoppingList.push("milk");     // ["milk"]
+shoppingList.push("bread");    // ["milk", "bread"]
+shoppingList.push("eggs");     // ["milk", "bread", "eggs"]
+
+// .length tells you how many items
+console.log(shoppingList.length); // 3</div>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Where it appears in the Orange code</div>
+          <p><code>u.pending</code> is an array that acts as a queue. When an event fires before the SDK is ready, <code>u.pending.push({ fn: fn, data: dataSnapshot })</code> adds that event's work to the list. Each item stores two things: the function to run (<code>fn</code>) and a frozen copy of the data at that moment (<code>data</code>).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. .splice() -->
+    <div class="dict-entry" data-level="basic">
+      <div class="dict-entry-header" onclick="toggleDict(this)">
+        <span class="dict-entry-code">u.pending.splice(0, u.pending.length)</span>
+        <span class="dict-entry-title">.splice() (Cut Items Out of an Array)</span>
+        <span class="dict-entry-level level-basic">Basic</span>
+        <span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="dict-entry-body">
+        <div class="dict-section">
+          <div class="dict-section-label">What it is</div>
+          <p><code>.splice(start, count)</code> removes items from an array and returns them. <code>splice(0, length)</code> means "starting from position 0, remove everything" — it empties the array and gives you all the items back.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Minimal example</div>
+          <div class="dict-code-block">var queue = ["task1", "task2", "task3"];
+var removed = queue.splice(0, queue.length);
+
+console.log(removed); // ["task1", "task2", "task3"]
+console.log(queue);   // [] (now empty)</div>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Why not just read the array?</div>
+          <p>Because new events could keep arriving while we're processing old ones. <code>splice</code> atomically grabs everything and clears the list, so any events that arrive <em>during</em> processing go into a fresh empty array instead of being mixed in with the batch we're already handling.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Callbacks -->
+    <div class="dict-entry" data-level="basic">
+      <div class="dict-entry-header" onclick="toggleDict(this)">
+        <span class="dict-entry-code">function(fn) { fn(); }</span>
+        <span class="dict-entry-title">Callbacks (Passing Functions Around)</span>
+        <span class="dict-entry-level level-basic">Basic</span>
+        <span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="dict-entry-body">
+        <div class="dict-section">
+          <div class="dict-section-label">What it is</div>
+          <p>In JavaScript, functions are values — you can store them in variables, put them in arrays, and pass them to other functions. A <strong>callback</strong> is a function you hand to someone else to run later, usually when something finishes.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Minimal example</div>
+          <div class="dict-code-block">function doAfterDelay(callback) {
+  setTimeout(function() {
+    callback();  // run whatever was passed in
+  }, 1000);
+}
+
+doAfterDelay(function() {
+  console.log("This runs 1 second later!");
+});</div>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Where it appears in the Orange code</div>
+          <p>The queue stores callbacks: <code>u.enqueue(runWork, snapshot)</code> — <code>runWork</code> is a function stored for later. When <code>u.drain()</code> runs, it loops through the queue and calls each stored function: <code>q[i].fn()</code>. The SDK loader also uses a callback: <code>cb: u.sdkLoaderCallback</code> — "when the script finishes loading, run this function."</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-real-world">&#128161; <strong>Real-world analogy:</strong> You call a restaurant and they say "we'll call you back when your table is ready." Your phone number is the callback — you gave them a way to reach you later when the work is done.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Promises -->
+    <div class="dict-entry" data-level="intermediate">
+      <div class="dict-entry-header" onclick="toggleDict(this)">
+        <span class="dict-entry-code">new Promise(function(resolve) { })</span>
+        <span class="dict-entry-title">Promises (Waiting for Async Work)</span>
+        <span class="dict-entry-level level-intermediate">Intermediate</span>
+        <span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="dict-entry-body">
+        <div class="dict-section">
+          <div class="dict-section-label">What it is</div>
+          <p>A <strong>Promise</strong> represents a value that doesn't exist yet but will in the future. You create one by passing in a function that receives <code>resolve</code> (call this when the work succeeds) and optionally <code>reject</code> (call this when it fails). Code that needs the result uses <code>.then()</code> to say "when it's ready, do this."</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Minimal example</div>
+          <div class="dict-code-block">var coffeeReady = new Promise(function(resolve) {
+  // The coffee machine takes 3 seconds
+  setTimeout(function() {
+    resolve("Here's your latte");
+  }, 3000);
+});
+
+// Meanwhile, you can do other things...
+
+coffeeReady.then(function(coffee) {
+  console.log(coffee); // "Here's your latte" (3s later)
+});</div>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Where it appears in the Orange code</div>
+          <p><code>u.loadScript()</code> returns a Promise that resolves when the script finishes loading. The web experiment polling is a Promise that resolves when <code>window.webExperiment</code> appears (or after 3 seconds). <code>Promise.all([...])</code> waits for ALL of them to finish before proceeding to <code>u.loaderCallback()</code>.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-real-world">&#128161; <strong>Real-world analogy:</strong> You order three things on Amazon. <code>Promise.all</code> is like waiting until all three parcels arrive before you start setting up your new desk. If one parcel is delayed, you wait. If one fails to deliver, the whole setup is affected (unless you handle it — which this code does by resolving on error).</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Promise.all -->
+    <div class="dict-entry" data-level="intermediate">
+      <div class="dict-entry-header" onclick="toggleDict(this)">
+        <span class="dict-entry-code">Promise.all([p1, p2, p3]).then(...)</span>
+        <span class="dict-entry-title">Promise.all (Wait for Everything)</span>
+        <span class="dict-entry-level level-intermediate">Intermediate</span>
+        <span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="dict-entry-body">
+        <div class="dict-section">
+          <div class="dict-section-label">What it is</div>
+          <p><code>Promise.all</code> takes an array of Promises and returns a single Promise that resolves only when <em>every</em> Promise in the array has resolved. If any one rejects, the whole thing rejects (unless you handle it).</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Minimal example</div>
+          <div class="dict-code-block">var loadCSS = loadFile("styles.css");
+var loadFont = loadFile("font.woff");
+var loadImage = loadFile("hero.jpg");
+
+Promise.all([loadCSS, loadFont, loadImage])
+  .then(function() {
+    console.log("Everything loaded — show the page!");
+  });</div>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Where it appears in the Orange code</div>
+          <p><code>sdkLoaderCallback</code> uses <code>Promise.all</code> to load Session Replay, Guides &amp; Surveys, and poll for Web Experiment all at the same time. Only when all three are done does it call <code>u.loaderCallback()</code> to register plugins and init the SDK. Crucially, <code>u.loadScript</code> resolves (not rejects) on error — so one broken CDN link won't block the whole chain.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. IIFE / Self-invoking function -->
+    <div class="dict-entry" data-level="intermediate">
+      <div class="dict-entry-header" onclick="toggleDict(this)">
+        <span class="dict-entry-code">(function() { ... })();</span>
+        <span class="dict-entry-title">IIFE — Immediately Invoked Function Expression</span>
+        <span class="dict-entry-level level-intermediate">Intermediate</span>
+        <span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="dict-entry-body">
+        <div class="dict-section">
+          <div class="dict-section-label">What it is</div>
+          <p>A function that runs immediately after it's defined. The outer parentheses <code>(function() { ... })</code> turn the function declaration into an expression, and the trailing <code>()</code> calls it right away. It creates a private scope so variables inside don't leak out.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Minimal example</div>
+          <div class="dict-code-block">// Normal function: defined now, called later
+function greet() { console.log("Hi"); }
+greet();
+
+// IIFE: defined AND called in one go
+(function() {
+  var secret = "you can't see me outside";
+  console.log("I run immediately!");
+})();
+
+// secret is NOT accessible here — it's private</div>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Where it appears in the Orange code</div>
+          <p>The entire tag is wrapped in <code>(function (id, loader) { ... }("##UTID##", "##UTLOADERID##"));</code> — this keeps all the tag's variables private so they don't clash with other tags on the page. The Amplitude snippet loader also uses an IIFE.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. Polling Pattern -->
+    <div class="dict-entry" data-level="pattern">
+      <div class="dict-entry-header" onclick="toggleDict(this)">
+        <span class="dict-entry-code">(function poll() { setTimeout(poll, 50); })();</span>
+        <span class="dict-entry-title">Polling Pattern (Keep Checking Until Ready)</span>
+        <span class="dict-entry-level level-pattern">Pattern</span>
+        <span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="dict-entry-body">
+        <div class="dict-section">
+          <div class="dict-section-label">What it is</div>
+          <p>A function that calls <em>itself</em> after a short delay using <code>setTimeout</code>. Each time it runs, it checks a condition. If the condition is met, it stops. If not, it schedules itself again. This is called <strong>recursive polling</strong> — "keep asking every X milliseconds until the answer changes."</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Minimal example</div>
+          <div class="dict-code-block">var pizzaReady = false;
+
+// Somewhere else, the pizza finishes after 5 seconds:
+setTimeout(function() { pizzaReady = true; }, 5000);
+
+// We poll every 500ms to check:
+(function checkOven() {
+  if (pizzaReady) {
+    console.log("Pizza is done!");
+  } else {
+    console.log("Still cooking...");
+    setTimeout(checkOven, 500);  // check again in 500ms
+  }
+})();</div>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Where it appears in the Orange code</div>
+          <p>Two places: (1) Polling for <code>window.webExperiment</code> every 50ms for up to 3 seconds — "has Tag 1 finished loading yet?" (2) Polling <code>u.isSDKReady()</code> every 50ms for up to 5 seconds as a fallback if the SDK init doesn't return a promise.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-real-world">&#128161; <strong>Real-world analogy:</strong> You're waiting for a friend at a cafe. You don't stare at the door non-stop — you check your phone, glance up every 30 seconds, and when you see them, you wave. That periodic glance is polling.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. JSON.parse(JSON.stringify()) -->
+    <div class="dict-entry" data-level="intermediate">
+      <div class="dict-entry-header" onclick="toggleDict(this)">
+        <span class="dict-entry-code">JSON.parse(JSON.stringify(obj))</span>
+        <span class="dict-entry-title">Deep Clone (Freezing a Copy of Data)</span>
+        <span class="dict-entry-level level-intermediate">Intermediate</span>
+        <span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="dict-entry-body">
+        <div class="dict-section">
+          <div class="dict-section-label">What it is</div>
+          <p>In JavaScript, objects are passed by <strong>reference</strong> — if you write <code>var b = a</code>, both <code>a</code> and <code>b</code> point to the <em>same</em> object. Changing one changes the other. <code>JSON.stringify</code> converts the object to a text string, and <code>JSON.parse</code> converts it back to a brand new, independent object. It's the simplest way to create a deep copy.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Minimal example</div>
+          <div class="dict-code-block">var original = { name: "Alice", scores: [10, 20] };
+
+// Shallow copy — DANGEROUS:
+var shallow = original;
+shallow.name = "Bob";
+console.log(original.name); // "Bob" — original changed too!
+
+// Deep clone — SAFE:
+var clone = JSON.parse(JSON.stringify(original));
+clone.name = "Charlie";
+console.log(original.name); // "Bob" — original unaffected</div>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Where it appears in the Orange code</div>
+          <p><code>var snapshot = JSON.parse(JSON.stringify(u.data))</code> — every time an event fires, the code takes a frozen snapshot of <code>u.data</code> at that exact moment. If another event fires 50ms later and overwrites <code>u.data</code>, the first event's snapshot is safe and untouched. This prevents the race condition bug.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-real-world">&#128161; <strong>Real-world analogy:</strong> It's like photocopying a document before handing the original to someone else. They can scribble all over their copy — your photocopy stays clean.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. Object.keys().forEach() -->
+    <div class="dict-entry" data-level="basic">
+      <div class="dict-entry-header" onclick="toggleDict(this)">
+        <span class="dict-entry-code">Object.keys(obj).forEach(function(key) { })</span>
+        <span class="dict-entry-title">Iterating Over Object Properties</span>
+        <span class="dict-entry-level level-basic">Basic</span>
+        <span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="dict-entry-body">
+        <div class="dict-section">
+          <div class="dict-section-label">What it is</div>
+          <p><code>Object.keys(obj)</code> gives you an array of all the property names (keys) of an object. <code>.forEach()</code> runs a function once for each item in that array. Together, they let you loop through every property of an object.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Minimal example</div>
+          <div class="dict-code-block">var user = { name: "Giuliano", role: "Consultant", city: "Paris" };
+
+Object.keys(user).forEach(function(key) {
+  console.log(key + ": " + user[key]);
+});
+// Output:
+// "name: Giuliano"
+// "role: Consultant"
+// "city: Paris"</div>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Where it appears in the Orange code</div>
+          <p>Used extensively: iterating over data mappings (<code>Object.keys(u.map).forEach(...)</code>), applying user properties (<code>Object.keys(u.data.set).forEach(...)</code>), setting groups, processing UTM parameters. It's the standard way to say "for each property in this object, do something."</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11. Short-circuit evaluation -->
+    <div class="dict-entry" data-level="intermediate">
+      <div class="dict-entry-header" onclick="toggleDict(this)">
+        <span class="dict-entry-code">condition && doSomething()</span>
+        <span class="dict-entry-title">Short-Circuit Evaluation (Conditional Shorthand)</span>
+        <span class="dict-entry-level level-intermediate">Intermediate</span>
+        <span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="dict-entry-body">
+        <div class="dict-section">
+          <div class="dict-section-label">What it is</div>
+          <p>In JavaScript, <code>&&</code> (AND) evaluates left to right and stops as soon as something is falsy. So <code>A && B</code> means: "if A is truthy, evaluate B; otherwise, skip B entirely." It's a compact way to write "only do this if that condition is true."</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Minimal example</div>
+          <div class="dict-code-block">// These two are equivalent:
+if (userLoggedIn) { showDashboard(); }
+
+userLoggedIn && showDashboard();</div>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Where it appears in the Orange code</div>
+          <p>Inside <code>Promise.all</code>: <code>u.toBoolean(u.data.session_replay) && u.loadScript(sessionReplayUrl)</code>. This means "only load the Session Replay script if session_replay is true." If it's false, the <code>&&</code> short-circuits and returns <code>false</code> instead of calling <code>loadScript</code>. The <code>.filter(Boolean)</code> after the array then removes those <code>false</code> entries.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 12. .filter(Boolean) -->
+    <div class="dict-entry" data-level="intermediate">
+      <div class="dict-entry-header" onclick="toggleDict(this)">
+        <span class="dict-entry-code">[...].filter(Boolean)</span>
+        <span class="dict-entry-title">.filter(Boolean) (Remove Falsy Values)</span>
+        <span class="dict-entry-level level-intermediate">Intermediate</span>
+        <span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="dict-entry-body">
+        <div class="dict-section">
+          <div class="dict-section-label">What it is</div>
+          <p><code>.filter()</code> creates a new array with only the items that pass a test. <code>Boolean</code> is JavaScript's built-in function that returns <code>true</code> for truthy values and <code>false</code> for falsy ones (like <code>false</code>, <code>null</code>, <code>undefined</code>, <code>0</code>, <code>""</code>). So <code>.filter(Boolean)</code> strips out all the "empty" values.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Minimal example</div>
+          <div class="dict-code-block">var items = ["apple", false, "banana", null, "cherry", 0, ""];
+
+var clean = items.filter(Boolean);
+console.log(clean); // ["apple", "banana", "cherry"]</div>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Where it appears in the Orange code</div>
+          <p>In the <code>Promise.all</code> array: when a plugin is disabled (e.g. <code>session_replay</code> is false), the short-circuit produces <code>false</code> instead of a Promise. <code>.filter(Boolean)</code> removes those <code>false</code> entries so <code>Promise.all</code> only waits for the plugins that are actually loading.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 13. Recursive object building -->
+    <div class="dict-entry" data-level="pattern">
+      <div class="dict-entry-header" onclick="toggleDict(this)">
+        <span class="dict-entry-code">u.mapFunc(arr, obj, item)</span>
+        <span class="dict-entry-title">Recursion (A Function That Calls Itself)</span>
+        <span class="dict-entry-level level-pattern">Pattern</span>
+        <span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="dict-entry-body">
+        <div class="dict-section">
+          <div class="dict-section-label">What it is</div>
+          <p><strong>Recursion</strong> is when a function calls itself to solve a smaller version of the same problem. Each call handles one piece, then hands the rest to another call. It stops when there's nothing left (the "base case").</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Minimal example</div>
+          <div class="dict-code-block">// Build nested object from a path like "a.b.c" = value
+function buildPath(keys, obj, value) {
+  var key = keys.shift();    // take the first key
+  if (keys.length === 0) {
+    obj[key] = value;         // last key — set the value
+  } else {
+    obj[key] = obj[key] || {};  // create sub-object if needed
+    buildPath(keys, obj[key], value);  // recurse with remaining keys
+  }
+}
+
+var result = {};
+buildPath(["eventProperties", "plan", "name"], result, "Premium");
+// result = { eventProperties: { plan: { name: "Premium" } } }</div>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Where it appears in the Orange code</div>
+          <p><code>u.mapFunc</code> does exactly this. When Tealium's mapping says "put this data layer value into <code>eventProperties.plan_name</code>", mapFunc splits that string by dots, then recursively builds the nested object structure one level at a time.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-real-world">&#128161; <strong>Real-world analogy:</strong> Think of creating nested folders: <code>Documents/Work/Orange/</code>. You create "Documents" (if it doesn't exist), step into it, create "Work" (if it doesn't exist), step into it, then create "Orange". Each step is the same process, one level deeper.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 14. try/catch -->
+    <div class="dict-entry" data-level="basic">
+      <div class="dict-entry-header" onclick="toggleDict(this)">
+        <span class="dict-entry-code">try { ... } catch (error) { ... }</span>
+        <span class="dict-entry-title">Try/Catch (Graceful Error Handling)</span>
+        <span class="dict-entry-level level-basic">Basic</span>
+        <span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="dict-entry-body">
+        <div class="dict-section">
+          <div class="dict-section-label">What it is</div>
+          <p><code>try</code> says "attempt this code." If anything inside throws an error, instead of crashing the page, execution jumps to the <code>catch</code> block where you can handle it gracefully (log it, ignore it, retry, etc.).</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Minimal example</div>
+          <div class="dict-code-block">try {
+  var data = JSON.parse("this is not valid JSON");
+} catch (error) {
+  console.log("Parsing failed:", error.message);
+  // Page keeps working — doesn't crash
+}</div>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Where it appears in the Orange code</div>
+          <p>The entire tag template is wrapped in a <code>try/catch</code>: <code>try { (function(id, loader) { ... })(...); } catch (error) { utag.DB(error); }</code>. If anything goes wrong in the Amplitude tag, it logs the error but doesn't break the rest of the page or other tags. The queue drain also uses <code>try/catch</code> around each queued function.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-real-world">&#128161; <strong>Real-world analogy:</strong> It's like a safety net under a tightrope. If the performer falls (error), the net catches them and the show continues. Without it, a fall would stop everything.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 15. Method chaining -->
+    <div class="dict-entry" data-level="pattern">
+      <div class="dict-entry-header" onclick="toggleDict(this)">
+        <span class="dict-entry-code">.setProductId(x).setPrice(y).setQuantity(z)</span>
+        <span class="dict-entry-title">Method Chaining (Fluent Interface)</span>
+        <span class="dict-entry-level level-pattern">Pattern</span>
+        <span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="dict-entry-body">
+        <div class="dict-section">
+          <div class="dict-section-label">What it is</div>
+          <p>When a method returns <code>this</code> (the object itself), you can call another method on the result immediately. This lets you chain multiple operations in a single, readable line instead of writing separate statements.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Minimal example</div>
+          <div class="dict-code-block">// Without chaining (repetitive):
+var burger = new OrderBuilder();
+burger.setBun("brioche");
+burger.setPatty("beef");
+burger.addTopping("cheese");
+
+// With chaining (clean):
+var burger = new OrderBuilder()
+  .setBun("brioche")
+  .setPatty("beef")
+  .addTopping("cheese");</div>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Where it appears in the Orange code</div>
+          <p>The Revenue API: <code>new amplitude.Revenue().setProductId(id).setPrice(price).setQuantity(qty).setRevenueType(type).setEventProperties(props)</code>. Also the Identify API: <code>new amplitude.Identify().set(key, value)</code>. Each method returns the object so the next method can be called immediately.</p>
+        </div>
+      </div>
+    </div>
+
+    </div><!-- end dictEntries -->
+  `,
+
   'init-sequence': () => `
     <div class="card">
       <h3>What happens when a user visits an Orange page</h3>
@@ -1768,6 +2362,26 @@ function switchCodeTab(tab, blockId) {
   const explorer = tab.closest('.code-explorer');
   explorer.querySelectorAll('.code-block').forEach(b => b.classList.remove('active'));
   document.getElementById(blockId).classList.add('active');
+}
+
+function toggleDict(header) {
+  header.classList.toggle('open');
+  header.nextElementSibling.classList.toggle('open');
+  var arrow = header.querySelector('.expand-arrow');
+  if (arrow) arrow.style.transform = header.classList.contains('open') ? 'rotate(180deg)' : '';
+}
+
+function filterDict(btn, level) {
+  btn.parentElement.querySelectorAll('.dict-filter').forEach(function(f) { f.classList.remove('active'); });
+  btn.classList.add('active');
+  var entries = document.querySelectorAll('.dict-entry');
+  entries.forEach(function(entry) {
+    if (level === 'all' || entry.getAttribute('data-level') === level) {
+      entry.classList.remove('filtered');
+    } else {
+      entry.classList.add('filtered');
+    }
+  });
 }
 
 var diagramDetails = {
