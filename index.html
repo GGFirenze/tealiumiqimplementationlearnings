@@ -483,6 +483,112 @@
   .confidence-face.selected { border-color: var(--orange-brand); background: var(--orange-light); transform: scale(1.15); }
   .confidence-label { font-size: 12px; color: var(--text-secondary); }
 
+  /* ── Code Map ── */
+  .codemap-layout {
+    display: flex; gap: 0; border-radius: var(--radius);
+    border: 1px solid var(--border); overflow: hidden;
+    height: 70vh; min-height: 480px; margin-bottom: 20px;
+    background: var(--code-bg);
+  }
+  .codemap-sidebar {
+    width: 220px; flex-shrink: 0; background: #181825;
+    border-right: 1px solid #2a2a3d;
+    display: flex; flex-direction: column; overflow-y: auto;
+    padding: 12px 0;
+  }
+  .codemap-sidebar-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: #6C7086; padding: 10px 16px 6px;
+  }
+  .codemap-btn {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px; cursor: pointer; transition: all 0.2s;
+    border: none; background: none; text-align: left; width: 100%;
+    font-size: 13px; color: #BAC2DE; font-family: inherit;
+    border-left: 3px solid transparent; position: relative;
+  }
+  .codemap-btn:hover { background: rgba(255,255,255,0.04); color: #F5F5F7; }
+  .codemap-btn.active {
+    background: rgba(255,121,0,0.08); color: var(--orange-brand);
+    border-left-color: var(--orange-brand); font-weight: 600;
+  }
+  .codemap-btn-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .codemap-btn-lines {
+    font-size: 10px; color: #6C7086; margin-left: auto;
+    font-weight: 500; white-space: nowrap;
+  }
+  .codemap-btn.active .codemap-btn-lines { color: var(--orange-brand); opacity: 0.7; }
+
+  .codemap-center {
+    flex: 1; display: flex; flex-direction: column; min-width: 0;
+  }
+  .codemap-toolbar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 16px; background: #181825;
+    border-bottom: 1px solid #2a2a3d; flex-shrink: 0;
+  }
+  .codemap-filename {
+    font-size: 12px; font-weight: 600; color: #BAC2DE;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .codemap-info {
+    font-size: 11px; color: #6C7086; margin-left: auto;
+  }
+  .codemap-code-scroll {
+    flex: 1; overflow: auto; position: relative;
+  }
+  .codemap-code {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 12px; line-height: 1.65; color: var(--code-text);
+    padding: 12px 0; counter-reset: codeline; white-space: pre;
+    min-width: max-content;
+  }
+  .codemap-line {
+    display: flex; padding: 0 16px 0 0;
+    transition: background 0.25s;
+  }
+  .codemap-line.hl {
+    background: rgba(255,121,0,0.10);
+  }
+  .codemap-line.hl-edge-top {
+    border-top: 1px solid rgba(255,121,0,0.35);
+  }
+  .codemap-line.hl-edge-bottom {
+    border-bottom: 1px solid rgba(255,121,0,0.35);
+  }
+  .codemap-line .ln {
+    display: inline-block; width: 48px; text-align: right;
+    padding-right: 16px; color: #45475a; user-select: none; flex-shrink: 0;
+    font-size: 11px;
+  }
+  .codemap-line.hl .ln { color: var(--orange-brand); opacity: 0.7; }
+  .codemap-line .lc {
+    flex: 1; white-space: pre; padding-right: 24px;
+  }
+
+  .codemap-detail {
+    background: #1a1a2e; border-top: 2px solid var(--orange-brand);
+    padding: 16px 20px; flex-shrink: 0;
+    min-height: 56px; max-height: 140px; overflow-y: auto;
+    transition: all 0.3s;
+  }
+  .codemap-detail-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--orange-brand); margin-bottom: 4px;
+  }
+  .codemap-detail-text {
+    font-size: 13px; color: #CDD6F4; line-height: 1.55;
+  }
+  .codemap-detail-text code {
+    background: rgba(255,255,255,0.08); padding: 1px 5px;
+    border-radius: 3px; font-size: 11.5px;
+  }
+  .codemap-detail-placeholder {
+    font-size: 13px; color: #6C7086; font-style: italic;
+  }
+
   /* ── Expand/Collapse ── */
   .expandable { margin-bottom: 12px; }
   .expand-header {
@@ -734,10 +840,18 @@ const sections = [
     subtitle: 'An annotated walkthrough of the key sections in tealium_template.js.'
   },
   {
+    id: 'code-map',
+    title: 'Code Map',
+    group: 'Understanding the Code',
+    badge: { text: 'Code', cls: 'badge-code' },
+    fullTitle: 'Interactive Code Map',
+    subtitle: 'The full template at a glance — click a topic to see exactly where that logic lives.'
+  },
+  {
     id: 'js-dictionary',
     title: 'JS Patterns Guide',
     group: 'Understanding the Code',
-    badge: { text: 'JS Recap', cls: 'badge-js' },
+    badge: { text: 'JS Fundamentals', cls: 'badge-js' },
     fullTitle: 'JavaScript Patterns Dictionary',
     subtitle: 'Every pattern used in this codebase, explained from scratch in plain English.'
   },
@@ -1335,7 +1449,7 @@ const sectionContent = {
 
   'code-deep-dive': () => `
     <div class="card">
-      <h3>The template has 6 main sections</h3>
+      <h3>The template has 7 main sections</h3>
       <p>Click each tab below to explore the annotated code. You don't need to memorise this — it's reference material for when you need to debug or explain specific behaviour.</p>
     </div>
 
@@ -1344,6 +1458,7 @@ const sectionContent = {
         <div class="code-tab active" onclick="switchCodeTab(this, 'ct-queue')">Queue System</div>
         <div class="code-tab" onclick="switchCodeTab(this, 'ct-plugins')">Plugin Loading</div>
         <div class="code-tab" onclick="switchCodeTab(this, 'ct-init')">SDK Init</div>
+        <div class="code-tab" onclick="switchCodeTab(this, 'ct-xdomain')">Cross-Domain</div>
         <div class="code-tab" onclick="switchCodeTab(this, 'ct-events')">Event Callback</div>
         <div class="code-tab" onclick="switchCodeTab(this, 'ct-send')">u.send()</div>
         <div class="code-tab" onclick="switchCodeTab(this, 'ct-utm')">UTM Handling</div>
@@ -1411,14 +1526,63 @@ amplitude.<span class="code-func">add</span>(window.engagement.<span class="code
 <span class="code-comment">// 3. Register Web Experiment</span>
 amplitude.<span class="code-func">add</span>(window.webExperiment.<span class="code-func">plugin</span>());
 
-<span class="code-comment">// 4. NOW initialise (autocaptured page views fire after this)</span>
+<span class="code-comment">// 4. Build config (includes optional cross-domain sessionId)</span>
+<span class="code-keyword">var</span> amplConfig = {
+  <span class="code-comment">// ... autocapture, cookies, tracking options ...</span>
+  sessionId: d.sessionId ? <span class="code-func">Number</span>(d.sessionId) : <span class="code-keyword">undefined</span>,
+  <span class="code-comment">// If sessionId is empty, clearEmptyKeys removes it and</span>
+  <span class="code-comment">// the SDK falls back to the native ampSessionId URL parameter.</span>
+};
+
+<span class="code-comment">// 5. NOW initialise (autocaptured page views fire after this)</span>
 <span class="code-keyword">var</span> initResult = amplitude.<span class="code-func">init</span>(apiKey, customerId, config);
+
+<span class="code-comment">// 6. Cross-domain lastEventTime restoration (see Cross-Domain tab)</span>
 
 initResult.promise.<span class="code-func">then</span>(<span class="code-keyword">function</span>() {
   u.amplitudeReady = <span class="code-keyword">true</span>;
   u.<span class="code-func">drain</span>();  <span class="code-comment">// Process all queued events</span>
 });
-<div class="code-annotation">If <code>amplitude.init()</code> returns a promise, we wait for it. If not (older SDKs), we fall back to polling <code>u.isSDKReady()</code> every 50ms for up to 5 seconds.</div>
+<div class="code-annotation">If <code>amplitude.init()</code> returns a promise, we wait for it. If not (older SDKs), we fall back to polling <code>u.isSDKReady()</code> every 50ms for up to 5 seconds. The <code>sessionId</code> in config is new — it enables cross-domain session continuity via the data layer.</div>
+      </div>
+
+      <div class="code-block" id="ct-xdomain">
+<div class="code-annotation"><strong>New:</strong> Cross-domain session continuity. When a user navigates between domains, the SDK loses session state. The source domain passes <code>sessionId</code>, <code>deviceId</code>, and <code>lastEventTime</code> — either via URL params or data layer mappings. This IIFE runs synchronously right after <code>amplitude.init()</code>.</div>
+<span class="code-comment">// Problem: setSessionId() sets lastEventTime = sessionId (the start time).</span>
+<span class="code-comment">// For sessions &gt;30 min old but still active, the SDK thinks it timed out.</span>
+<span class="code-comment">// Fix: restore the real lastEventTime from data layer or URL parameter.</span>
+
+(<span class="code-keyword">function</span> () {
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">var</span> letMs = <span class="code-keyword">null</span>;
+
+    <span class="code-comment">// 1. Data layer (highest priority)</span>
+    <span class="code-keyword">if</span> (d.lastEventTime) {
+      letMs = <span class="code-func">Number</span>(d.lastEventTime);
+    }
+
+    <span class="code-comment">// 2. URL parameter fallback</span>
+    <span class="code-keyword">if</span> (!letMs || <span class="code-func">isNaN</span>(letMs)) {
+      <span class="code-keyword">var</span> letMatch = window.location.search.<span class="code-func">match</span>(
+        <span class="code-string">/[?&amp;]amp_last_event_time=(\\d+)/</span>
+      );
+      <span class="code-keyword">if</span> (letMatch) letMs = <span class="code-func">parseInt</span>(letMatch[<span class="code-num">1</span>], <span class="code-num">10</span>);
+    }
+
+    <span class="code-comment">// 3. Apply if valid and within 30-min session timeout</span>
+    <span class="code-keyword">if</span> (letMs && !<span class="code-func">isNaN</span>(letMs) && amplitude.config
+        && (Date.<span class="code-func">now</span>() - letMs) &lt; <span class="code-num">1800000</span>) {
+      amplitude.config.lastEventTime = letMs;
+      utag.<span class="code-func">DB</span>(<span class="code-string">"Cross-domain lastEventTime restored: "</span> + letMs);
+    }
+  } <span class="code-keyword">catch</span> (e) {}
+})();
+<div class="code-annotation"><strong>Key points:</strong> (1) Data layer wins over URL params if both are set. (2) The 1,800,000 ms guard = 30 minutes — if the gap is larger, the session <em>should</em> timeout. (3) This runs <em>synchronously</em> after <code>init()</code> (which calls <code>setSessionId</code> synchronously) but <em>before</em> plugin setup fires Page Viewed (async microtask).</div>
+<div class="code-annotation"><strong>Source domain link decoration:</strong>
+<code>var sessionId = amplitude.getSessionId();</code>
+<code>var deviceId = amplitude.getDeviceId();</code>
+<code>var lastEventTime = amplitude.config.lastEventTime;</code>
+Append: <code>?ampSessionId=...&amp;ampDeviceId=...&amp;amp_last_event_time=...</code></div>
       </div>
 
       <div class="code-block" id="ct-events">
@@ -1458,8 +1622,9 @@ initResult.promise.<span class="code-func">then</span>(<span class="code-keyword
       <div class="code-block" id="ct-send">
 <div class="code-annotation"><code>u.send()</code> is the main entry point — Tealium calls this for every event. It builds the data object, applies mappings, handles e-commerce, validates config, and either fires immediately or queues for later.</div>
 <span class="code-var">u.send</span> = <span class="code-keyword">function</span>(utag_event, data_layer) {
-  <span class="code-comment">// 1. Build u.data with defaults</span>
-  u.data = { base_url: <span class="code-string">"...zoning-alpha..."</span>, api_key: <span class="code-string">"##UTVARconfig_api_key##"</span>, ... };
+  <span class="code-comment">// 1. Build u.data with defaults (includes cross-domain session fields)</span>
+  u.data = { base_url: <span class="code-string">"...zoning-alpha..."</span>, api_key: <span class="code-string">"##UTVARconfig_api_key##"</span>,
+    sessionId: <span class="code-string">""</span>, lastEventTime: <span class="code-string">""</span>, ... };
 
   <span class="code-comment">// 2. Tealium extensions run here (##UTEXTEND##)</span>
 
@@ -1504,11 +1669,39 @@ initResult.promise.<span class="code-func">then</span>(<span class="code-keyword
     </div>
   `,
 
+  'code-map': () => `
+    <div class="card">
+      <h3>Where does each piece live?</h3>
+      <p>The Code Deep Dive showed you <em>what</em> each section does. This view shows you <em>where</em> it sits in the actual file. Click a topic on the left — the matching lines light up and scroll into view.</p>
+    </div>
+
+    <div class="codemap-layout">
+      <div class="codemap-sidebar" id="codemapSidebar"></div>
+      <div class="codemap-center">
+        <div class="codemap-toolbar">
+          <span class="codemap-filename">tealium_template.js</span>
+          <span class="codemap-info" id="codemapInfo">711 lines &middot; click a topic</span>
+        </div>
+        <div class="codemap-code-scroll" id="codemapScroll">
+          <div class="codemap-code" id="codemapCode"></div>
+        </div>
+        <div class="codemap-detail" id="codemapDetail">
+          <div class="codemap-detail-placeholder">Select a topic to see where it lives in the template and what it does.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="infobox infobox-tip">
+      <div class="infobox-icon">&#128161;</div>
+      <div><strong>Tip:</strong> Use this as a reference map when debugging. If someone says "there's an issue with the queue" — click <strong>Queue System</strong> and you instantly know you're looking at lines 30-64.</div>
+    </div>
+  `,
+
   'js-dictionary': () => `
     <div class="analogy">
       <div class="analogy-icon">&#128218;</div>
       <h4>JavaScript patterns used in this codebase, broken down one by one</h4>
-      <p>If you haven't touched JavaScript in a while, then this section is for you. Each entry below shows the pattern, explains it in plain English, shows a minimal standalone example, then points to exactly where it appears in the Orange code.</p>
+      <p>Each entry below shows the pattern, explains it in plain English, shows a minimal standalone example, then points to exactly where it appears in the Orange code. Organised by difficulty so you can start with the basics and build up.</p>
     </div>
 
     <div class="dict-filter-bar">
@@ -2022,6 +2215,74 @@ var burger = new OrderBuilder()
       </div>
     </div>
 
+    <!-- 13. URL Parameter Parsing with RegExp -->
+    <div class="dict-entry" data-level="intermediate">
+      <div class="dict-entry-header" onclick="toggleDict(this)">
+        <span class="dict-entry-code">location.search.match(/[?&amp;]param=(\\d+)/)</span>
+        <span class="dict-entry-title">URL Parameter Parsing with RegExp</span>
+        <span class="dict-entry-level level-intermediate">Intermediate</span>
+        <span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="dict-entry-body">
+        <div class="dict-section">
+          <div class="dict-section-label">What it is</div>
+          <p>A <strong>regular expression</strong> (regex) is a pattern that matches text. <code>String.match(regex)</code> returns an array: the full match at index 0, and each <strong>capture group</strong> (parts in parentheses) at subsequent indices. If no match is found, it returns <code>null</code>.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Minimal example</div>
+          <div class="dict-code-block">var url = "?foo=42&amp;bar=hello";
+var match = url.match(/[?&amp;]bar=([^&amp;]+)/);
+// match[0] = "&amp;bar=hello"  (full match)
+// match[1] = "hello"        (capture group)
+
+if (match) {
+  console.log(match[1]); // "hello"
+}</div>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Where it appears in the Orange code</div>
+          <p>In the cross-domain session block: <code>window.location.search.match(/[?&amp;]amp_last_event_time=(\\d+)/)</code>. This extracts the <code>amp_last_event_time</code> value from the URL's query string. <code>(\\d+)</code> captures one or more digits. <code>[?&amp;]</code> matches the parameter separator — either <code>?</code> (first param) or <code>&amp;</code> (subsequent params).</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-real-world">&#128161; <strong>Real-world analogy:</strong> A regex is like a search-and-extract template. "Find anything that looks like <code>amp_last_event_time=NUMBERS</code> and hand me just the numbers." The capture group is the parenthesised part — it's the specific piece you want pulled out.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 14. Synchronous Write Between Async Steps -->
+    <div class="dict-entry" data-level="pattern">
+      <div class="dict-entry-header" onclick="toggleDict(this)">
+        <span class="dict-entry-code">amplitude.config.lastEventTime = letMs</span>
+        <span class="dict-entry-title">Synchronous Patch Between Init and Async Setup</span>
+        <span class="dict-entry-level level-pattern">Design Pattern</span>
+        <span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="dict-entry-body">
+        <div class="dict-section">
+          <div class="dict-section-label">What it is</div>
+          <p>When an SDK has a synchronous setup phase followed by an asynchronous continuation (via Promises or microtasks), there's a brief window where you can modify the SDK's internal state <em>after</em> synchronous init completes but <em>before</em> the async work fires. This pattern exploits that timing gap to patch a value that the SDK set incorrectly during init.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Minimal example</div>
+          <div class="dict-code-block">// sdk.init() runs synchronously, sets lastEventTime = sessionStart
+sdk.init({ sessionId: oldTimestamp });
+// At this point, lastEventTime is wrong (it equals sessionStart)
+
+// Patch it BEFORE the async plugin setup fires Page Viewed
+sdk.config.lastEventTime = correctTimestamp;
+
+// Now when the async microtask runs, it sees the correct value</div>
+        </div>
+        <div class="dict-section">
+          <div class="dict-section-label">Where it appears in the Orange code</div>
+          <p>The cross-domain IIFE runs right after <code>amplitude.init()</code>. Init internally calls <code>setSessionId()</code> which sets <code>lastEventTime = sessionId</code> (the session <em>start</em> time). The IIFE overwrites this with the real last activity time. This must happen synchronously — by the time <code>initResult.promise.then()</code> resolves (async microtask), autocaptured Page Viewed has already fired and used <code>lastEventTime</code> to decide whether to start a new session.</p>
+        </div>
+        <div class="dict-section">
+          <div class="dict-real-world">&#128161; <strong>Real-world analogy:</strong> Imagine a restaurant opens at 8am (init). The host sets the "last customer arrived" clock to 8am. But actually, someone called at 8:29am to say they're coming. Before the waiter (async task) checks the clock at 8:31am and decides to close the empty restaurant, you quickly update the clock to 8:29am. The waiter sees "last activity: 2 minutes ago" and keeps it open.</div>
+        </div>
+      </div>
+    </div>
+
     </div><!-- end dictEntries -->
   `,
 
@@ -2074,6 +2335,7 @@ var burger = new OrderBuilder()
         <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text"><code>Web Experiment plugin registered</code></span></li>
         <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">No <code>webExperiment not available after 3000ms</code> warning</span></li>
         <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text"><code>CALLBACK:COMPLETE</code> messages appear (events being sent)</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text"><code>Cross-domain lastEventTime restored: &lt;timestamp&gt;</code> appears (if testing cross-domain navigation)</span></li>
       </ul>
     </div>
 
@@ -2085,6 +2347,7 @@ var burger = new OrderBuilder()
         <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">User properties are being set correctly</span></li>
         <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">Experiment impressions fire for users matching Page Trigger conditions</span></li>
         <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">Events show the EU flag (data residency correct)</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">Cross-domain: <code>[Amplitude] Page Viewed</code> on destination domain shares the <strong>same session ID</strong> as the source domain</span></li>
       </ul>
     </div>
   `,
@@ -2159,12 +2422,34 @@ var burger = new OrderBuilder()
         <p><strong>Good news:</strong> The tag has onerror handling — <code>u.loadScript</code> resolves (not rejects) on error, so <code>Promise.all</code> should still proceed. If it's truly stuck, check for network-level blocks (e.g. a corporate firewall blocking <code>cdn.eu.amplitude.com</code>).</p>
       </div>
     </div>
+
+    <div class="expandable">
+      <div class="expand-header" onclick="toggleExpand(this)">
+        <span>&#128308; Cross-domain: new session created on destination domain</span><span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="expand-body">
+        <p><strong>Most likely cause:</strong> <code>lastEventTime</code> is not being passed, or the session started more than 30 minutes ago and the user was inactive.</p>
+        <p><strong>Diagnosis:</strong> Check the console on the destination domain for <code>Cross-domain lastEventTime restored</code>. If missing, the <code>amp_last_event_time</code> URL parameter or data layer mapping is not set.</p>
+        <p><strong>How it works:</strong> When the SDK receives a <code>sessionId</code> (via <code>ampSessionId</code> URL param or data layer), it calls <code>setSessionId()</code> which sets <code>lastEventTime = sessionId</code> — the session <em>start</em> time. For sessions &gt;30 min old but still active, this makes the SDK think the session timed out. The tag fixes this by overwriting <code>lastEventTime</code> with the real value.</p>
+        <p><strong>Fix:</strong> Ensure the source domain decorates outbound links with all three values: <code>ampSessionId</code>, <code>ampDeviceId</code>, and <code>amp_last_event_time</code>. Read them via <code>amplitude.getSessionId()</code>, <code>amplitude.getDeviceId()</code>, and <code>amplitude.config.lastEventTime</code>.</p>
+      </div>
+    </div>
+
+    <div class="expandable">
+      <div class="expand-header" onclick="toggleExpand(this)">
+        <span>&#128993; Cross-domain: data layer and URL params both set — which wins?</span><span class="expand-arrow">&#9660;</span>
+      </div>
+      <div class="expand-body">
+        <p><strong>Answer:</strong> The data layer always wins silently. If both <code>d.sessionId</code> (data layer mapping) and <code>ampSessionId</code> (URL param) are present, the data layer value is used for <code>sessionId</code>. Same for <code>lastEventTime</code>: <code>d.lastEventTime</code> overrides <code>amp_last_event_time</code>.</p>
+        <p><strong>Recommendation:</strong> Pick one approach per implementation. Don't mix both for the same event — it causes confusion during debugging.</p>
+      </div>
+    </div>
   `,
 
   'quiz': () => `
     <div class="card" style="border-left: 4px solid var(--warning);">
       <h3>Test Your Knowledge</h3>
-      <p>8 questions covering everything you've learned. Don't worry about getting them all right — the explanations are the valuable part.</p>
+      <p>9 questions covering everything you've learned. Don't worry about getting them all right — the explanations are the valuable part.</p>
     </div>
 
     ${buildQuiz()}
@@ -2232,6 +2517,17 @@ const quizData = [
     opts: ["The api_key is wrong", "The serverZone mapping is missing or not set to 'EU'", "The Session Replay plugin is broken", "The browser doesn't support promises"],
     correct: 1,
     expl: "If events are going to the US project, the serverZone is either not mapped or not set to 'EU'. Check the data mappings in Tag 2 — there should be a static mapping of 'EU' to the serverZone destination."
+  },
+  {
+    q: "Why does the tag need to restore lastEventTime for cross-domain session continuity?",
+    opts: [
+      "The SDK doesn't support cross-domain sessions at all",
+      "The SDK's setSessionId() sets lastEventTime to the session start time, which makes sessions >30 min old appear timed out",
+      "The browser clears all timestamps when navigating between domains",
+      "The lastEventTime is needed for GDPR compliance"
+    ],
+    correct: 1,
+    expl: "When the SDK receives a sessionId (via URL param or data layer), setSessionId() sets lastEventTime = sessionId — the session START time. For a session that started >30 min ago but had recent activity, the SDK calculates (now - start) > 30 min and creates a new session. The tag patches lastEventTime with the real last activity time to prevent this."
   },
   {
     q: "What is the correct order of operations at initialisation time?",
@@ -2446,13 +2742,783 @@ function playSequence() {
       steps[i].classList.add('active');
       steps[i].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       i++;
-      setTimeout(next, 1200);
+      setTimeout(next, 2800);
     } else {
       seqPlaying = false;
     }
   }
   next();
 }
+
+// ── Code Map ──
+const codemapTopics = [
+  {
+    id: 'cm-bootstrap', label: 'Bootstrapping', color: '#6C7086',
+    lines: [1, 24],
+    detail: 'Version comments, the <code>amplitude</code> global declaration, the Tealium loader function (responsible for injecting script/iframe/img elements), and the <code>typeOf</code> utility. This is boilerplate that Tealium generates — you won\'t touch this.'
+  },
+  {
+    id: 'cm-polyfill', label: 'Promise Polyfill', color: '#89B4FA',
+    lines: [26, 27],
+    detail: 'A full <code>Promise</code> polyfill for older browsers that lack native support. It\'s a single minified line. If the browser already has <code>Promise</code>, this is a no-op. Defensive — ensures <code>Promise.all</code> works everywhere.'
+  },
+  {
+    id: 'cm-queue', label: 'Queue System', color: '#F38BA8',
+    lines: [29, 63],
+    detail: 'The event buffering mechanism. <code>u.enqueue(fn, snapshot)</code> stores work + a frozen copy of the data. <code>u.drain()</code> replays everything in order once the SDK is ready. <code>u.isSDKReady()</code> checks if Amplitude has initialised by testing for <code>getDeviceId()</code>.'
+  },
+  {
+    id: 'cm-utils', label: 'Utility Functions', color: '#A6E3A1',
+    lines: [66, 139],
+    detail: 'Helper functions used throughout: <code>u.ACTIONS</code> (identify operation constants), <code>u.toBoolean</code> / <code>u.setDefaultValue</code> (normalise config strings), <code>u.mapFunc</code> (recursively build nested objects from dot-paths), <code>u.clearEmptyKeys</code>, <code>u.getFirstNonEmpty</code>, and <code>u.loadScript</code> (Promise-based script loader with error resilience).'
+  },
+  {
+    id: 'cm-identify', label: 'Identify & UTM Helpers', color: '#FAB387',
+    lines: [143, 185],
+    detail: '<code>u.identify(action, obj)</code> wraps all Amplitude Identify operations (set, setOnce, add, append, prepend, unset) into a single dispatcher. <code>u.collectUtmKeysSetFromObjectKeys</code> dynamically discovers UTM parameters from the data layer — handling both <code>utm_*</code> and Tealium\'s <code>qp.utm_*</code> prefix convention.'
+  },
+  {
+    id: 'cm-plugins', label: 'Plugin Loading', color: '#CBA6F7',
+    lines: [187, 238],
+    detail: '<code>u.sdkLoaderCallback</code> — fires after the core SDK script loads. Uses <code>Promise.all</code> to load Session Replay + Guides & Surveys scripts in parallel, while simultaneously polling for <code>window.webExperiment</code> (set by Tag 1). Captures an <code>initConfig</code> snapshot to avoid stale reads. Once all three resolve, calls <code>u.loaderCallback</code>.'
+  },
+  {
+    id: 'cm-init', label: 'SDK Initialisation', color: '#89DCEB',
+    lines: [240, 370],
+    detail: '<code>u.loaderCallback</code> — the heart of initialisation. Builds the Amplitude config object (autocapture, cookies, tracking options, server zone, <strong>sessionId</strong>). Registers all available plugins via <code>amplitude.add()</code> <strong>before</strong> calling <code>amplitude.init()</code>. Now also includes the cross-domain <code>lastEventTime</code> restoration block.'
+  },
+  {
+    id: 'cm-xdomain', label: 'Cross-Domain Sessions', color: '#F5C2E7',
+    lines: [321, 352],
+    detail: '<strong>New in this version.</strong> An IIFE that runs right after <code>amplitude.init()</code> to restore <code>lastEventTime</code> for cross-domain handoffs. Reads from the data layer first (highest priority), falls back to the <code>amp_last_event_time</code> URL parameter. Guards against values older than 30 minutes (session timeout). Fixes the bug where sessions &gt;30 min old (but still active) were incorrectly split on the destination domain.'
+  },
+  {
+    id: 'cm-events', label: 'Event Callback', color: '#F9E2AF',
+    lines: [373, 429],
+    detail: '<code>u.callback</code> — called for every Tealium event after the SDK is ready. Applies opt-out, sends user properties (set/setOnce/add/append/prepend/unset), fires a custom <code>amplitude.track()</code> event, sets group membership, and loops through product arrays to send <code>amplitude.revenue()</code> per product.'
+  },
+  {
+    id: 'cm-send', label: 'u.send() Entry Point', color: '#FF7900',
+    lines: [432, 705],
+    detail: 'The main entry point Tealium calls for every page view / link click. Builds <code>u.data</code> with all defaults (now includes <code>sessionId</code> and <code>lastEventTime</code> fields for cross-domain support), runs extensions, applies data mappings, pulls e-commerce values, discovers UTM params, validates the API key, handles page-view-specific identify, snapshots the data, then either fires immediately or enqueues + loads the SDK snippet on first call.'
+  }
+];
+
+let codemapRawLines = null;
+let activeCodemapTopic = null;
+
+function initCodeMap() {
+  if (!document.getElementById('codemapSidebar')) return;
+
+  const sidebar = document.getElementById('codemapSidebar');
+  sidebar.innerHTML = '<div class="codemap-sidebar-label">Topics</div>' +
+    codemapTopics.map(t =>
+      `<button class="codemap-btn" data-topic="${t.id}" onclick="selectCodemapTopic('${t.id}')">` +
+        `<span class="codemap-btn-dot" style="background:${t.color}"></span>` +
+        `<span>${t.label}</span>` +
+        `<span class="codemap-btn-lines">L${t.lines[0]}-${t.lines[1]}</span>` +
+      `</button>`
+    ).join('');
+
+  if (!codemapRawLines) {
+    codemapRawLines = TEALIUM_TEMPLATE_SOURCE.split('\n');
+  }
+
+  const codeEl = document.getElementById('codemapCode');
+  codeEl.innerHTML = codemapRawLines.map((raw, i) => {
+    const num = i + 1;
+    const escaped = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const colored = syntaxHighlightLine(escaped);
+    return `<div class="codemap-line" data-ln="${num}"><span class="ln">${num}</span><span class="lc">${colored}</span></div>`;
+  }).join('');
+}
+
+function syntaxHighlightLine(line) {
+  return line
+    .replace(/(\/\/.*)/g, '<span style="color:#6C7086;font-style:italic">$1</span>')
+    .replace(/\b(var|function|return|if|else|for|try|catch|new|typeof|switch|case|break|this|void)\b/g, '<span style="color:#CBA6F7">$1</span>')
+    .replace(/\b(true|false|null|undefined)\b/g, '<span style="color:#FAB387">$1</span>')
+    .replace(/(\b\d+\b)/g, '<span style="color:#FAB387">$1</span>')
+    .replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g, '<span style="color:#A6E3A1">$1</span>')
+    .replace(/\b(Promise|Object|Array|Date|JSON|Math|window|document|console|setTimeout)\b/g, '<span style="color:#89DCEB">$1</span>');
+}
+
+function selectCodemapTopic(topicId) {
+  const topic = codemapTopics.find(t => t.id === topicId);
+  if (!topic) return;
+
+  activeCodemapTopic = topicId;
+
+  document.querySelectorAll('.codemap-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector(`.codemap-btn[data-topic="${topicId}"]`);
+  if (btn) btn.classList.add('active');
+
+  const allLines = document.querySelectorAll('.codemap-line');
+  allLines.forEach(el => {
+    el.classList.remove('hl', 'hl-edge-top', 'hl-edge-bottom');
+  });
+
+  const [startLine, endLine] = topic.lines;
+  allLines.forEach(el => {
+    const ln = parseInt(el.dataset.ln);
+    if (ln >= startLine && ln <= endLine) {
+      el.classList.add('hl');
+      if (ln === startLine) el.classList.add('hl-edge-top');
+      if (ln === endLine) el.classList.add('hl-edge-bottom');
+    }
+  });
+
+  const info = document.getElementById('codemapInfo');
+  info.textContent = `Lines ${startLine}–${endLine} · ${endLine - startLine + 1} lines highlighted`;
+
+  const detail = document.getElementById('codemapDetail');
+  detail.innerHTML = `<div class="codemap-detail-label">${topic.label}</div><div class="codemap-detail-text">${topic.detail}</div>`;
+
+  const firstHl = document.querySelector('.codemap-line.hl');
+  if (firstHl) {
+    const scroller = document.getElementById('codemapScroll');
+    const targetTop = firstHl.offsetTop - scroller.offsetTop - 60;
+    scroller.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+  }
+}
+
+const TEALIUM_TEMPLATE_SOURCE = `//~~tv:1236.20250926
+//~~tc: Enhanced functionality to allow for set/unset logic directly on the page view event, dynamic UTM parameter mapping, wildcard matching for UTM parameter keys, and improved handling of race conditions.
+//~~tc: Updated defaultTracking with autocapture
+//~~tc: Created new tag Amplitude Browser SDK
+//~~tc: Added Web Experiment plugin integration (polling + registration before init)
+//~~tc: Cross-domain session continuity: support sessionId + lastEventTime via both data layer mapping and URL parameters (ampSessionId / amp_last_event_time)
+
+var amplitude = amplitude || { _q: [], _iq: {} };
+
+//tealium universal tag - utag.sender.1236 ut4.0.##UTVERSION##, Copyright ##UTYEAR## Tealium.com Inc. All Rights Reserved.
+try {
+  (function (id, loader) {
+    var u = {id: id};
+    utag.o[loader].sender[id] = u;
+    // Please do not modify
+    if (utag.ut === undefined) { utag.ut = {}; }
+    // Start Tealium loader 4.41
+    /* utag.js version 4.26 or above is required ... */
+    var match = /ut\\d\\.(\\d*)\\..*/.exec(utag.cfg.v);
+    if (utag.ut.loader === undefined || !match || parseInt(match[1]) < 41) { u.loader = function(o, a, b, c, l, m) { /* ... loader logic ... */ }; } else { u.loader = utag.ut.loader; }
+    // End Tealium loader
+    
+    // Start Tealium typeOf 4.35
+    if (utag.ut.typeOf === undefined) { u.typeOf = function(e) {return ({}).toString.call(e).match(/\\s([a-zA-Z]+)/)[1].toLowerCase();};} else { u.typeOf = utag.ut.typeOf; }
+    // End Tealium typeOf
+
+    // Promise polyfill (provides fallback for older browsers; no-op when native Promise exists)
+    !function(e,t){"object"==typeof exports&&"undefined"!=typeof module?t():"function"==typeof define&&define.amd?define(t):t()}(0,function(){ /* ... polyfill ... */ });
+
+    u.ev = {
+      view: 1,
+      link: 1
+    };
+    u.initialized = false;
+    u.scriptrequested = false;
+    u.last_event = null;
+    u.last_data_layer = null;
+
+    u.amplitudeReady = false;
+    u.pending = [];
+
+    u.enqueue = function(fn, dataSnapshot) {
+      if (typeof fn === "function") {
+        u.pending.push({ fn: fn, data: dataSnapshot });
+      }
+    };
+
+    u.drain = function() {
+      var q = u.pending.splice(0, u.pending.length);
+      for (var i = 0; i < q.length; i++) {
+        try {
+          u.data = q[i].data;
+          q[i].fn();
+        } catch (e) {
+          if (window.utag && utag.DB) utag.DB(e);
+        }
+      }
+    };
+
+    u.isSDKReady = function () {
+      try {
+        return !!(window.amplitude && typeof amplitude.getDeviceId === "function" && amplitude.getDeviceId());
+      } catch(_){ return false; }
+    };
+
+
+    u.ACTIONS = {
+      ADD: "add",
+      APPEND: "append",
+      PREPEND: "prepend",
+      SET: "set",
+      SET_ONCE: "setOnce",
+      UNSET: "unset"
+    };
+
+    u.toBoolean = function (val) {
+      if (typeof val === "boolean") return val;
+      val = String(val || "").toLowerCase();
+      return val === "true" || val === "on";
+    };
+
+    u.setDefaultValue = function (val) {
+      if (val === "") {
+        return true;
+      }
+      return u.toBoolean(val);
+    };
+
+    u.mapFunc = function(arr, obj, item) {
+      var i = arr.shift();
+      obj[i] = obj[i] || {};
+      if (arr.length > 0) {
+        u.mapFunc(arr, obj[i], item);
+      } else {
+        obj[i] = item;
+      }
+    };
+
+    u.clearEmptyKeys = function (object) {
+      for (var key in object) {
+        if (object[key] === "" || object[key] === undefined) {
+          delete object[key];
+        }
+      }
+      return object;
+    };
+
+    u.getFirstNonEmpty = function () {
+      var candidates = Array.prototype.slice.call(arguments);
+      var normalized = candidates.map(function (candidate) {
+        return (typeof candidate === "string") ? candidate.trim() : candidate;
+      });
+      var first = normalized.find(function (candidateValue) {
+        return candidateValue !== undefined && candidateValue !== null && candidateValue !== "";
+      });
+      return (first !== undefined) ? first : "";
+    };
+
+    // Script loader with onerror handling
+    u.loadScript = function (src, id) {
+      return new Promise(function (resolve) {
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.async = true;
+        script.charset = "utf-8";
+        script.src = src;
+        if (id) script.id = id;
+        script.addEventListener("load", function () { resolve(true); });
+        script.addEventListener("error", function () {
+          utag.DB("utag ##UTID##: failed to load " + src);
+          resolve(false); // resolve (not reject) so Promise.all continues
+        });
+        var head = document.getElementsByTagName("head")[0];
+        if (head) head.appendChild(script);
+      });
+    };
+
+    ##UTGEN##
+
+    u.identify = function (action, obj) {
+      Object.keys(obj || {}).forEach(function(key) {
+        var identifyEvent;
+        switch (action) {
+          case u.ACTIONS.ADD:
+            identifyEvent = new amplitude.Identify().add(key, obj[key]);
+            break;
+          case u.ACTIONS.APPEND:
+            identifyEvent = new amplitude.Identify().append(key, obj[key]);
+            break;
+          case u.ACTIONS.PREPEND:
+            identifyEvent = new amplitude.Identify().prepend(key, obj[key]);
+            break;
+          case u.ACTIONS.SET:
+            identifyEvent = new amplitude.Identify().set(key, obj[key]);
+            break;
+          case u.ACTIONS.SET_ONCE:
+            identifyEvent = new amplitude.Identify().setOnce(key, obj[key]);
+            break;
+          case u.ACTIONS.UNSET:
+            identifyEvent = new amplitude.Identify().unset(key);
+            break;
+        }
+        if (identifyEvent) {
+          amplitude.identify(identifyEvent);
+        }
+      });
+    };
+
+    u.collectUtmKeysSetFromObjectKeys = function (obj) {
+      var utmKeysSetLocal = {};
+      Object.keys(obj).forEach(function (rawKey) {
+        var normalizedKey = String(rawKey || "").toLowerCase();
+        if (normalizedKey.indexOf("qp.utm_") === 0) {
+          utmKeysSetLocal[normalizedKey.slice(3)] = true;
+        } else if (normalizedKey.indexOf("utm_") === 0) {
+          utmKeysSetLocal[normalizedKey] = true;
+        }
+      });
+      return utmKeysSetLocal;
+    };
+
+    // SDK Loader Callback: loads plugin scripts and waits for external dependencies,
+    // then calls u.loaderCallback() which registers plugins and calls amplitude.init().
+    u.sdkLoaderCallback = function () {
+      var cdnBase = "https://cdn.eu.amplitude.com";
+      var sessionReplayUrl = cdnBase + "/libs/plugin-session-replay-browser-" + u.data.session_replay_version + "-min.js.gz";
+
+      // Capture config values now to avoid stale u.data reads
+      var initConfig = {
+        api_key: u.data.api_key,
+        customer_id: u.data.customer_id,
+        userId: u.data.userId,
+        data: JSON.parse(JSON.stringify(u.data))
+      };
+
+      Promise.all([
+        // Plugin 1: Session Replay
+        u.toBoolean(u.data.session_replay) &&
+          u.loadScript(sessionReplayUrl, "utag_session_replay_##UTID##"),
+
+        // Plugin 2: Guides & Surveys
+        u.toBoolean(u.data.guides_and_surveys) &&
+          u.loadScript(cdnBase + "/script/" + u.data.api_key + ".engagement.js", "utag_guides_and_surveys_##UTID##"),
+
+        // Plugin 3: Web Experiment (polled — loaded by external synchronous Tag 1)
+        u.toBoolean(u.data.web_experiment) && new Promise(function (resolve) {
+          if (window.webExperiment && typeof window.webExperiment.plugin === "function") {
+            utag.DB("utag ##UTID##: webExperiment already available");
+            resolve();
+            return;
+          }
+          var start = Date.now();
+          var timeout = 3000;
+          (function poll() {
+            if (window.webExperiment && typeof window.webExperiment.plugin === "function") {
+              utag.DB("utag ##UTID##: webExperiment available after " + (Date.now() - start) + "ms");
+              resolve();
+            } else if (Date.now() - start > timeout) {
+              utag.DB("utag ##UTID##: webExperiment not available after " + timeout + "ms, proceeding without");
+              resolve();
+            } else {
+              setTimeout(poll, 50);
+            }
+          })();
+        })
+      ].filter(Boolean)).then(function () {
+        u.loaderCallback(initConfig);
+      });
+    };
+
+    // Start Loader Callback — registers all plugins, then calls amplitude.init()
+    u.loaderCallback = function (initConfig) {
+      utag.DB('send:##UTID##:CALLBACK');
+      u.initialized = true;
+
+      var d = (initConfig && initConfig.data) ? initConfig.data : u.data;
+
+      var amplConfig = {
+        flushIntervalMillis: d.flushIntervalMillis,
+        flushQueueSize: d.flushQueueSize,
+        flushMaxRetries: d.flushMaxRetries,
+        logLevel: d.logLevel,
+        serverUrl: d.serverUrl,
+        serverZone: d.serverZone,
+        useBatch: u.toBoolean(d.useBatch),
+        autocapture: {
+          attribution: u.setDefaultValue(d.attribution),
+          pageViews: u.setDefaultValue(d.pageViews),
+          sessions: u.setDefaultValue(d.sessions),
+          fileDownload: u.setDefaultValue(d.fileDownloads),
+          formInteractions: u.setDefaultValue(d.formInteractions),
+          elementInteractions: u.setDefaultValue(d.elementInteractions)
+        },
+        deviceId: d.deviceId,
+        // Optional: force sessionId from the data layer. If empty, clearEmptyKeys removes it
+        // and the SDK falls back to the native ampSessionId URL parameter.
+        sessionId: d.sessionId ? Number(d.sessionId) : undefined,
+        cookieOptions: u.clearEmptyKeys({
+            domain: d.domain,
+            expiration: d.expiration,
+            sameSite: d.sameSite,
+            secure: d.secure,
+            upgrade: u.setDefaultValue(d.upgrade),
+        }),
+        identityStorage: d.identityStorage,
+        trackingOptions: {
+          ipAddress: u.setDefaultValue(d.ipAddress),
+          language: u.setDefaultValue(d.language),
+          platform: u.setDefaultValue(d.platform),
+        },
+        transport: d.transport
+      };
+
+      if (!u.toBoolean(d.autocapture)) {
+        amplConfig.autocapture = false;
+      }
+
+      var customerId = d.customer_id;
+      if (customerId === "" && d.userId) {
+        customerId = d.userId;
+      }
+
+      // Plugin Registration (ALL plugins BEFORE amplitude.init)
+      if (u.toBoolean(d.session_replay) && window.sessionReplay && typeof window.sessionReplay.plugin === "function") {
+        amplitude.add(window.sessionReplay.plugin());
+        utag.DB("utag ##UTID##: Session Replay plugin registered");
+      }
+
+      if (u.toBoolean(d.guides_and_surveys) && window.engagement && typeof window.engagement.plugin === "function") {
+        amplitude.add(window.engagement.plugin());
+        utag.DB("utag ##UTID##: Guides & Surveys plugin registered");
+      }
+
+      if (u.toBoolean(d.web_experiment) && window.webExperiment && typeof window.webExperiment.plugin === "function") {
+        amplitude.add(window.webExperiment.plugin());
+        utag.DB("utag ##UTID##: Web Experiment plugin registered");
+      } else if (u.toBoolean(d.web_experiment)) {
+        utag.DB("utag ##UTID##: Web Experiment plugin NOT available at init time");
+      }
+
+      // Initialize Amplitude
+      var initResult = amplitude.init(d.api_key, customerId, u.clearEmptyKeys(amplConfig));
+
+      // Cross-domain session continuity: restore lastEventTime
+      //
+      // Problem: when a sessionId is passed (via amplConfig.sessionId from data layer, or via
+      // the ampSessionId URL parameter), the SDK calls setSessionId(), which sets
+      // lastEventTime = sessionId (the session *start* timestamp). For a session that started
+      // >30 min ago but was still active on the source domain, this makes the SDK think the
+      // session has timed out and it opens a new one.
+      //
+      // Fix: the source domain passes the true lastEventTime — either via the data layer
+      // (d.lastEventTime) or via the amp_last_event_time URL parameter. We restore it
+      // synchronously here — after setSessionId() has run (sync inside init()) but before
+      // plugin setup fires Page Viewed (async Promise microtask). Data layer wins if both
+      // are present, mirroring the sessionId priority (amplConfig.sessionId > ampSessionId URL).
+      (function () {
+        try {
+          var letMs = null;
+          // 1. Data layer (highest priority)
+          if (d.lastEventTime) {
+            letMs = Number(d.lastEventTime);
+          }
+          // 2. URL parameter fallback
+          if (!letMs || isNaN(letMs)) {
+            var letMatch = window.location.search.match(/[?&]amp_last_event_time=(\\d+)/);
+            if (letMatch) letMs = parseInt(letMatch[1], 10);
+          }
+          // 3. Apply if valid and within the 30-minute session timeout window
+          if (letMs && !isNaN(letMs) && amplitude.config && (Date.now() - letMs) < 1800000) {
+            amplitude.config.lastEventTime = letMs;
+            utag.DB("utag ##UTID##: Cross-domain lastEventTime restored: " + letMs);
+          }
+        } catch (e) {}
+      })();
+
+      if (initResult && initResult.promise && typeof initResult.promise.then === "function") {
+        initResult.promise.then(function () {
+          u.amplitudeReady = true;
+          u.drain();
+        });
+      } else {
+        var start = Date.now();
+        (function waitReady(){
+          if (u.isSDKReady() || Date.now() - start > 5000) {
+            u.amplitudeReady = true;
+            u.drain();
+          } else {
+            setTimeout(waitReady, 50);
+          }
+        })();
+      }
+    };
+    // End Loader Callback
+
+    // Start Event Callback
+    u.callback = function () {
+      utag.DB("send:##UTID##:CALLBACK");
+
+      amplitude.setOptOut(u.toBoolean(u.data.optOut));
+
+      if (u.data.set) {
+        var identify_par = new amplitude.Identify();
+        Object.keys(u.data.set).forEach(function(key) {
+          identify_par.set(key, u.data.set[key]);
+        });
+        amplitude.identify(identify_par);
+      }
+
+      u.identify(u.ACTIONS.ADD, u.data.add);
+      u.identify(u.ACTIONS.APPEND, u.data.append);
+      u.identify(u.ACTIONS.PREPEND, u.data.prepend);
+      u.identify(u.ACTIONS.SET_ONCE, u.data.setOnce);
+      u.identify(u.ACTIONS.UNSET, u.data.unset);
+
+      if (u.data.event_type) {
+        amplitude.track({
+          event_type: u.data.event_type,
+          event_properties: u.data.eventProperties,
+          groups: u.data.group
+        });
+      }
+
+      if(u.data.group){
+        Object.keys(u.data.group).forEach(function(key) {
+          amplitude.setGroup(key, u.data.group[key]);
+        });
+      }
+
+      // Revenue
+      if (u.data.order_id) {
+        var revenueProperties = {
+          order_id: u.data.order_id
+        };
+        u.data.product_id.forEach(function(productId, index) {
+          if (u.data.product_quantity[index] && u.data.product_unit_price[index]) {
+            var revenue = new amplitude
+                .Revenue()
+                .setProductId(productId)
+                .setPrice(parseFloat(u.data.product_unit_price[index]))
+                .setQuantity(parseInt(u.data.product_quantity[index]))
+                .setRevenueType(u.data.order_type)
+                .setEventProperties(revenueProperties);
+            amplitude.revenue(revenue);
+          }
+        });
+      }
+      utag.DB("send:##UTID##:CALLBACK:COMPLETE");
+    };
+    // End Event Callback
+
+
+    u.send = function (utag_event, data_layer) {
+      if (!u.ev[utag_event] && u.ev.all === undefined) {
+        utag.DB('send:##UTID##:EVENT NOT SUPPORTED:COMPLETE');
+        return;
+      }
+
+      var a, b, c, d, e, f, g, h;
+      a = utag_event;
+      b = data_layer;
+
+      u.last_event = a;
+      u.last_data_layer = b;
+
+      u.data = {
+        base_url: "https://cdn.amplitude.com/libs/analytics-browser-2.34.1-feat-zoning-alpha.0-min.js.gz",
+        api_key: "##UTVARconfig_api_key##",
+        sdk_version: "##UTVARconfig_sdk_version##",
+        autocapture: true,
+        elementInteractions: "",
+        deviceId: "",
+        // Cross-domain session continuity (optional — map from data layer if not using URL params)
+        sessionId: "",
+        lastEventTime: "",
+        flushIntervalMillis: "",
+        flushQueueSize: "",
+        flushMaxRetries: "",
+        identityStorage: "",
+        logLevel: "",
+        optOut: false,
+        serverUrl: "",
+        serverZone: "",
+        transport: "",
+        useBatch: false,
+        userId: "",
+        add: {},
+        append: {},
+        prepend: {},
+        set: {},
+        setOnce: {},
+        unset: {},
+        page_set: {},
+        page_unset: {},
+        group: {},
+        customer_id: "",
+        product_id: [],
+        product_quantity: [],
+        product_unit_price: [],
+        event: "",
+        custom: {},
+        eventProperties: {},
+        attribution: "",
+        pageViews: "",
+        sessions: "",
+        formInteractions: "",
+        fileDownloads: "",
+        ipAddress: "",
+        language: "",
+        platform: "",
+        session_replay: "##UTVARconfig_session_replay##",
+        session_replay_version: "##UTVARconfig_session_replay_version##",
+        guides_and_surveys: "##UTVARconfig_guides_and_surveys##",
+        web_experiment: "##UTVARconfig_web_experiment##",
+        domain: "",
+        expiration: "",
+        sameSite: "",
+        secure: false,
+        upgrade: "",
+        utm_source: "",
+        utm_medium: "",
+        utm_campaign: "",
+        utm_term: "",
+        utm_content: ""
+      };
+
+      // Start tag-scoped extensions
+      ##UTEXTEND##
+      utag.DB("send:##UTID##:EXTENSIONS");
+      utag.DB(data_layer);
+      // End tag-scoped extensions
+
+      // Start Mapping
+      Object.keys(utag.loader.GV(u.map)).forEach(function(mapping_key) {
+        if (data_layer[mapping_key] !== undefined && data_layer[mapping_key] !== '') {
+          var destinations = u.map[mapping_key].split(',');
+          destinations.forEach(function(parameter) {
+            u.mapFunc(parameter.split('.'), u.data, data_layer[mapping_key]);
+          });
+        }
+      });
+      utag.DB('send:##UTID##:MAPPINGS');
+      utag.DB(u.data);
+      // End Mapping
+
+      // Pull E-Commerce extension values
+      var eCommerceMapping = [
+        { eCommerceData: data_layer._corder, name: 'order_id', isArray: false },
+        { eCommerceData: data_layer._ctype, name: 'order_type', isArray: false },
+        { eCommerceData: data_layer._ccustid, name: 'customer_id', isArray: false },
+        { eCommerceData: data_layer._cprod, name: 'product_id', isArray: true },
+        { eCommerceData: data_layer._cprice, name: 'product_unit_price', isArray: true },
+        { eCommerceData: data_layer._cquan, name: 'product_quantity', isArray: true }
+      ];
+
+      eCommerceMapping.forEach(function(dataObject){
+        if (!dataObject.isArray) {
+          u.data[dataObject.name] = u.data[dataObject.name] || dataObject.eCommerceData || '';
+        } else if (
+            u.data[dataObject.name].length === 0 &&
+            dataObject.eCommerceData !== undefined &&
+            dataObject.isArray
+        ) {
+          u.data[dataObject.name] = dataObject.eCommerceData.slice(0);
+        }
+      });
+
+      var utmKeysSet = u.collectUtmKeysSetFromObjectKeys(b);
+
+      Object.keys(utmKeysSet).forEach(function (utmKey) {
+        if (!u.data[utmKey]) {
+          var candidate = u.getFirstNonEmpty(
+              b[utmKey],
+              b["qp." + utmKey]
+          );
+          if (candidate) u.data[utmKey] = candidate;
+        }
+        if (u.data[utmKey] && u.data.eventProperties[utmKey] == null) {
+          u.data.eventProperties[utmKey] = u.data[utmKey];
+        }
+      });
+
+      if (!u.data.api_key) {
+        utag.DB(u.id + ": Tag not fired: Required attribute not populated");
+        return;
+      }
+
+      if(u.data.sdk_version === ""){
+        u.data.sdk_version = "2.6.0";
+      }
+
+      if (!u.data.session_replay_version) {
+        u.data.session_replay_version = "1.13.9";
+      }
+
+      var runWork = function(){ u.callback(); };
+
+      var pvIdentify = null;
+      if (a === "view") {
+        var pageSet = u.data.page_set || {};
+        var pageUnset = u.data.page_unset || {};
+        var hasSet = pageSet && Object.keys(pageSet).length > 0;
+        var hasUnset = pageUnset && Object.keys(pageUnset).length > 0;
+        if (hasSet || hasUnset) {
+          pvIdentify = function () {
+            var pvId = new amplitude.Identify();
+            if (hasSet) {
+              Object.keys(pageSet).forEach(function (pageKey) {
+                pvId.set(pageKey, pageSet[pageKey]);
+              });
+            }
+            if (hasUnset) {
+              Object.keys(pageUnset).forEach(function (pageKey) {
+                pvId.unset(pageKey);
+              });
+            }
+            amplitude.identify(pvId);
+          };
+        }
+      }
+
+      var snapshot = JSON.parse(JSON.stringify(u.data));
+
+      if (u.amplitudeReady) {
+        u.data = snapshot;
+        if (pvIdentify) { pvIdentify(); }
+        runWork();
+      } else {
+        if (pvIdentify) { u.enqueue(pvIdentify, snapshot); }
+        u.enqueue(runWork, snapshot);
+        if (!u.scriptrequested) {
+          u.scriptrequested = true;
+          /* Amplitude snippet loader (IIFE) */
+          (function() {
+            "use strict";
+            (function(e, t) {
+              var n = e.amplitude || { q: [], iq: {} };
+              if (n.invoked) {
+                e.console && console.error && console.error("Amplitude snippet has been loaded.");
+              } else {
+                /* ... stub methods for queue-before-load pattern ... */
+                n.invoked = true;
+                /* Identify & Revenue stubs */
+                /* Core method stubs: init, add, track, identify, etc. */
+                e.amplitude = n;
+              }
+            })(window, document);
+          })();
+
+          u.loader({
+            type: "script",
+            src: u.data.base_url.replace("##utag_sdk_version##", u.data.sdk_version),
+            cb: u.sdkLoaderCallback,
+            loc: "script",
+            id: "utag_##UTID##",
+            attrs: {}
+          });
+        }
+      }
+
+      utag.DB("send:##UTID##:COMPLETE");
+    };
+    utag.o[loader].loader.LOAD(id);
+  }("##UTID##", "##UTLOADERID##"));
+} catch (error) {
+  utag.DB(error);
+}
+//end tealium universal tag`;
+
+// Hook into renderSection to initialise code map after DOM is updated
+const _origRenderSection = renderSection;
+renderSection = function(idx) {
+  _origRenderSection(idx);
+  if (sections[idx].id === 'code-map') {
+    setTimeout(initCodeMap, 0);
+  }
+};
 
 // ── Init ──
 renderSection(0);
